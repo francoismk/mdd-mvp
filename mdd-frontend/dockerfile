@@ -1,0 +1,17 @@
+FROM node:20.18.0-alpine AS build
+
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm install --legacy-peer-deps && npm cache clean --force
+
+COPY . .
+
+RUN npx ng build --configuration=production
+
+FROM nginx:alpine
+
+COPY --from=build app/dist/mdd-frontend /usr/share/nginx/html
+
+EXPOSE 80
