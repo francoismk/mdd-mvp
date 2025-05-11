@@ -5,7 +5,6 @@ import com.example.mdd_backend.dtos.GetUserDTO;
 import com.example.mdd_backend.services.UserService;
 import jakarta.validation.Valid;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,7 +25,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetUserDTO> getUserById(@PathVariable UUID id) {
+    public ResponseEntity<GetUserDTO> getUserById(@PathVariable String id) {
         GetUserDTO user = userService.getUserById(id);
 
         if (user == null) {
