@@ -29,10 +29,13 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
-    public void createUser(CreateUserDTO userDTO) {
+    public GetUserDTO createUser(CreateUserDTO userDTO) {
         DBUser user = modelMapper.map(userDTO, DBUser.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+
+        DBUser savedUser = userRepository.save(user);
+
+        return modelMapper.map(savedUser, GetUserDTO.class);
     }
 
     public List<GetUserDTO> getAllUsers() {
