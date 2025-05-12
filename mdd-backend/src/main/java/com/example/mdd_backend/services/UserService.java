@@ -6,7 +6,6 @@ import com.example.mdd_backend.models.DBUser;
 import com.example.mdd_backend.repositories.UserRepository;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,10 +28,13 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
-    public void createUser(CreateUserDTO userDTO) {
+    public GetUserDTO createUser(CreateUserDTO userDTO) {
         DBUser user = modelMapper.map(userDTO, DBUser.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
+
+        DBUser savedUser = userRepository.save(user);
+
+        return modelMapper.map(savedUser, GetUserDTO.class);
     }
 
     public List<GetUserDTO> getAllUsers() {
@@ -43,7 +45,7 @@ public class UserService {
             .collect(Collectors.toList());
     }
 
-    public GetUserDTO getUserById(UUID id) {
+    public GetUserDTO getUserById(String id) {
         Optional<DBUser> user = userRepository.findById(id);
         if (user.isPresent()) {
             return modelMapper.map(user, GetUserDTO.class);

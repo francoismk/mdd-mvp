@@ -2,7 +2,6 @@ package com.example.mdd_backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -22,9 +21,13 @@ public class SecurityConfig {
                     SessionCreationPolicy.STATELESS
                 )
             )
-            .httpBasic(Customizer.withDefaults())
+            // .httpBasic(Customizer.withDefaults())
             .authorizeHttpRequests(auth ->
-                auth.requestMatchers("/api/**").permitAll()
+                auth
+                    .requestMatchers("/api/**")
+                    .permitAll()
+                    .anyRequest()
+                    .permitAll()
             );
 
         return httpSecurity.build();
