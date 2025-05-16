@@ -7,12 +7,10 @@ import com.example.mdd_backend.models.DBTheme;
 import com.example.mdd_backend.models.DBUser;
 import com.example.mdd_backend.repositories.ThemeRepository;
 import com.example.mdd_backend.repositories.UserRepository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,11 +51,21 @@ public class UserService {
             .stream()
             .map(user -> {
                 GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
-                if (user.getSubscriptions() != null && !user.getSubscriptions().isEmpty()) {
-                    List<GetThemeDTO> themeDTOs = user.getSubscriptions().stream()
+                if (
+                    user.getSubscriptions() != null &&
+                    !user.getSubscriptions().isEmpty()
+                ) {
+                    List<GetThemeDTO> themeDTOs = user
+                        .getSubscriptions()
+                        .stream()
                         .map(themeid -> {
-                            Optional<DBTheme> themeOptional = themeRepository.findById(themeid);
-                            return themeOptional.map(theme -> modelMapper.map(theme, GetThemeDTO.class)).orElse(null);
+                            Optional<DBTheme> themeOptional =
+                                themeRepository.findById(themeid);
+                            return themeOptional
+                                .map(theme ->
+                                    modelMapper.map(theme, GetThemeDTO.class)
+                                )
+                                .orElse(null);
                         })
                         .filter(themeDTO -> themeDTO != null)
                         .collect(Collectors.toList());
@@ -71,33 +79,55 @@ public class UserService {
     }
 
     public GetUserDTO getUserById(String id) {
-        DBUser user = userRepository.findById(id).orElseThrow(() -> new NoSuchElementException("user not found with ID : " + id));
-        
+        DBUser user = userRepository
+            .findById(id)
+            .orElseThrow(() ->
+                new NoSuchElementException("user not found with ID : " + id)
+            );
+
         GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
 
-        if (user.getSubscriptions() != null && !user.getSubscriptions().isEmpty()) {
-            List<GetThemeDTO> themeDTOs = user.getSubscriptions().stream()
+        if (
+            user.getSubscriptions() != null &&
+            !user.getSubscriptions().isEmpty()
+        ) {
+            List<GetThemeDTO> themeDTOs = user
+                .getSubscriptions()
+                .stream()
                 .map(themeId -> {
-                    Optional<DBTheme> themeOptional = themeRepository.findById(themeId);
-                    return themeOptional.map(theme -> modelMapper.map(theme, GetThemeDTO.class)).orElse(null);
+                    Optional<DBTheme> themeOptional = themeRepository.findById(
+                        themeId
+                    );
+                    return themeOptional
+                        .map(theme -> modelMapper.map(theme, GetThemeDTO.class))
+                        .orElse(null);
                 })
                 .filter(themeDTO -> themeDTO != null)
                 .collect(Collectors.toList());
 
-                userDTO.setSubscriptions(themeDTOs);
-        }
-        else {
+            userDTO.setSubscriptions(themeDTOs);
+        } else {
             userDTO.setSubscriptions(new ArrayList<>());
         }
         return userDTO;
     }
 
-    public GetThemeDTO subscribeUserToTheme(String userId, String themeId) {
-        DBUser user = userRepository.findById(userId).orElseThrow(() -> new NoSuchElementException("user not found with ID : " + userId));
-        DBTheme theme = themeRepository.findById(themeId).orElseThrow(() -> new NoSuchElementException("theme not found with ID : " + themeId));
+    public GetUserDTO subscribeUserToTheme(String userId, String themeId) {
+        DBUser user = userRepository
+            .findById(userId)
+            .orElseThrow(() ->
+                new NoSuchElementException("user not found with ID : " + userId)
+            );
+        DBTheme theme = themeRepository
+            .findById(themeId)
+            .orElseThrow(() ->
+                new NoSuchElementException(
+                    "theme not found with ID : " + themeId
+                )
+            );
         List<String> themeExisting = user.getSubscriptions();
 
-        if(themeExisting == null) {
+        if (themeExisting == null) {
             themeExisting = new ArrayList<>();
             user.setSubscriptions(themeExisting);
         }
@@ -106,9 +136,38 @@ public class UserService {
             themeExisting.add(theme.getId());
             userRepository.save(user);
         }
-        
-        return modelMapper.map(theme, GetThemeDTO.class);
-        
+
+        return getUserById(userId);
     }
 
+    public GetUserDTO unsuscribeUserToTheme(String userId, String themeId) {
+        // On va récupérer l'utilisateur
+        DBUser user = userRepository
+            .findById(userId)
+            .orElseThrow(() ->
+                new NoSuchElementException("User not found with ID : " + userId)
+            );
+
+        // on récupère les themes de l'utilisateurs
+        List<String> subscriptions = user.getSubscriptions();
+        // on vérifie qu'il y'en a au moins un (pas null)
+        if (subscriptions != null) {
+            // on supprimer le theme en question de subscriptions
+            boolean removed = subscriptions.remove(themeId);
+            if (removed) {
+                userRepository.save(user);
+            }
+        }
+        return getUserById(userId);
+    }
+
+    public void deleteUser(String userId) {
+        userRepository
+            .findById(userId)
+            .orElseThrow(() ->
+                new NoSuchElementException("User not found with ID : " + userId)
+            );
+
+        userRepository.deleteById(userId);
+    }
 }
