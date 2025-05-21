@@ -112,7 +112,7 @@ public class UserService {
         return userDTO;
     }
 
-    public GetUserDTO subscribeUserToTheme(String userId, String themeId) {
+    public GetUserDTO subscribeUserToTheme(String themeId, String userId) {
         DBUser user = userRepository
             .findById(userId)
             .orElseThrow(() ->
@@ -140,7 +140,7 @@ public class UserService {
         return getUserById(userId);
     }
 
-    public GetUserDTO unsuscribeUserToTheme(String userId, String themeId) {
+    public GetUserDTO unsuscribeUserToTheme(String themeId, String userId) {
         // On va récupérer l'utilisateur
         DBUser user = userRepository
             .findById(userId)
