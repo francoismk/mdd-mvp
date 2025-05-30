@@ -3,10 +3,16 @@ package com.example.mdd_backend.controllers;
 import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.GetUserDTO;
 import com.example.mdd_backend.services.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
+
+import org.slf4j.ILoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(UserService userService) {
         this.userService = userService;
@@ -51,13 +58,20 @@ public class UserController {
     }
 
     @PostMapping("/{themeId}/subscriptions")
-    public ResponseEntity<GetUserDTO> subscribeToTheme(@PathVariable String themeId, @RequestParam String userId) {
+    public ResponseEntity<GetUserDTO> subscribeToTheme(@PathVariable String themeId, Authentication authentication, HttpServletRequest request) {
+        logger.info("=== Auth header: {}", request.getHeader("Authorization"));
+        logger.info("=== Authentication: {}", authentication);
+        logger.info("=== Principal: {}", authentication.getPrincipal());
+        logger.info("=== Name: '{}'", authentication.getName());
+        String userId = authentication.getName();
         GetUserDTO user = userService.subscribeUserToTheme(themeId, userId);
+        logger.info("=== LE RETOUR du service ===> ", user);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{themeId}/unsubscriptions")
-    public ResponseEntity<GetUserDTO> unsubscribeToTheme(@PathVariable String themeId, @RequestParam String userId) {
+    public ResponseEntity<GetUserDTO> unsubscribeToTheme(@PathVariable String themeId, Authentication authentication) {
+        String userId = authentication.getName();
         GetUserDTO user = userService.unsuscribeUserToTheme(themeId, userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }

@@ -50,30 +50,7 @@ public class UserService {
         return users
             .stream()
             .map(user -> {
-                GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
-                if (
-                    user.getSubscriptions() != null &&
-                    !user.getSubscriptions().isEmpty()
-                ) {
-                    List<GetThemeDTO> themeDTOs = user
-                        .getSubscriptions()
-                        .stream()
-                        .map(themeid -> {
-                            Optional<DBTheme> themeOptional =
-                                themeRepository.findById(themeid);
-                            return themeOptional
-                                .map(theme ->
-                                    modelMapper.map(theme, GetThemeDTO.class)
-                                )
-                                .orElse(null);
-                        })
-                        .filter(themeDTO -> themeDTO != null)
-                        .collect(Collectors.toList());
-                    userDTO.setSubscriptions(themeDTOs);
-                } else {
-                    userDTO.setSubscriptions(new ArrayList<>());
-                }
-                return userDTO;
+                return buildUserDto(user);
             })
             .collect(Collectors.toList());
     }
@@ -85,6 +62,20 @@ public class UserService {
                 new NoSuchElementException("user not found with ID : " + id)
             );
 
+        return buildUserDto(user);
+    }
+
+    public GetUserDTO getUserByEmail(String email) {
+        DBUser user = userRepository
+            .findByEmail(email)
+            .orElseThrow(() ->
+                new NoSuchElementException("user not found with email : " + email)
+            );
+
+        return buildUserDto(user);
+    }
+
+    private GetUserDTO buildUserDto(DBUser user) {
         GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
 
         if (
@@ -112,12 +103,12 @@ public class UserService {
         return userDTO;
     }
 
-    public GetUserDTO subscribeUserToTheme(String themeId, String userId) {
+    public GetUserDTO subscribeUserToTheme(String themeId, String userEmail) {
         DBUser user = userRepository
-            .findById(userId)
-            .orElseThrow(() ->
-                new NoSuchElementException("user not found with ID : " + userId)
-            );
+            .findByEmail(userEmail).orElseThrow(
+                () -> new NoSuchElementException(
+                    "User not found with email : " + userEmail
+                ));
         DBTheme theme = themeRepository
             .findById(themeId)
             .orElseThrow(() ->
@@ -137,28 +128,24 @@ public class UserService {
             userRepository.save(user);
         }
 
-        return getUserById(userId);
+        return getUserByEmail(userEmail);
     }
 
-    public GetUserDTO unsuscribeUserToTheme(String themeId, String userId) {
-        // On va récupérer l'utilisateur
+    public GetUserDTO unsuscribeUserToTheme(String themeId, String userEmail) {
         DBUser user = userRepository
-            .findById(userId)
+            .findByEmail(userEmail)
             .orElseThrow(() ->
-                new NoSuchElementException("User not found with ID : " + userId)
+                new NoSuchElementException("User not found with ID : " + userEmail)
             );
 
-        // on récupère les themes de l'utilisateurs
         List<String> subscriptions = user.getSubscriptions();
-        // on vérifie qu'il y'en a au moins un (pas null)
         if (subscriptions != null) {
-            // on supprimer le theme en question de subscriptions
             boolean removed = subscriptions.remove(themeId);
             if (removed) {
                 userRepository.save(user);
             }
         }
-        return getUserById(userId);
+        return getUserByEmail(userEmail);
     }
 
     public void deleteUser(String userId) {

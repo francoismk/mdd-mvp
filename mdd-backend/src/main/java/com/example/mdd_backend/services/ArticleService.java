@@ -63,10 +63,11 @@ public class ArticleService {
                 .toList();
     }
 
-    public GetArticleDTO createArticle(CreateArticleDTO articleDTO, String authorId) {
+    public GetArticleDTO createArticle(CreateArticleDTO articleDTO, String authorEmail) {
         DBArticle article = modelMapper.map(articleDTO, DBArticle.class);
 
-        article.setAuthorId(authorId);
+        GetUserDTO user = userService.getUserByEmail(authorEmail);
+        article.setAuthorId(user.getId());
         article.setDate(new Date());
         article.setComments(new ArrayList<>());
 

@@ -2,6 +2,7 @@ package com.example.mdd_backend.services;
 
 import com.example.mdd_backend.dtos.CreateCommentDTO;
 import com.example.mdd_backend.dtos.GetCommentDTO;
+import com.example.mdd_backend.dtos.GetUserDTO;
 import com.example.mdd_backend.models.DBArticle;
 import com.example.mdd_backend.models.DBComment;
 import com.example.mdd_backend.repositories.ArticleRepository;
@@ -44,13 +45,17 @@ public class CommentService {
             .toList();
     }
 
-    public GetCommentDTO createComment(CreateCommentDTO createCommentDTO, String articleId, String authorId) {
-        DBArticle article = articleRepository.findById(articleId).orElseThrow(()->
-            new NoSuchElementException("Article not found with ID: " + articleId));
+    public GetCommentDTO createComment(CreateCommentDTO createCommentDTO, String articleId, String authorEmail) {
+        DBArticle article = articleRepository.findById(articleId).orElseThrow(
+            () -> new NoSuchElementException("Article not found with ID: " + articleId)
+        );
+
         DBComment comment = modelMapper.map(createCommentDTO, DBComment.class);
 
+        GetUserDTO user = userService.getUserByEmail(authorEmail);
+
         comment.setArticleId(articleId);
-        comment.setAuthorId(authorId);
+        comment.setAuthorId(user.getId());
         comment.setDate(new Date());
         DBComment savedComment = commentRepository.save(comment);
 
@@ -74,4 +79,6 @@ public class CommentService {
         commentDTO.setAuthor(userService.getUserById(comment.getAuthorId()));
         return commentDTO;
     }
+
+
 }

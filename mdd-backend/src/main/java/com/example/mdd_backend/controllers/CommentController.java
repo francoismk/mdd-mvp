@@ -6,6 +6,7 @@ import com.example.mdd_backend.services.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,11 +22,11 @@ public class CommentController {
     }
 
     @PostMapping
-    public ResponseEntity<GetCommentDTO> createComment(@Valid @RequestBody CreateCommentDTO commentDTO, @RequestParam String articleId, @RequestParam String authorId) {
+    public ResponseEntity<GetCommentDTO> createComment(@Valid @RequestBody CreateCommentDTO commentDTO, @RequestParam String articleId, Authentication authentication) {
         if (commentDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
+        String authorId = authentication.getName();
         GetCommentDTO createdComment = commentService.createComment(commentDTO, articleId, authorId);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }

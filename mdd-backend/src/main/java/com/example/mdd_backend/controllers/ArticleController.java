@@ -6,6 +6,7 @@ import com.example.mdd_backend.services.ArticleService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,12 +22,13 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<GetArticleDTO> createArticle(@Valid @RequestBody CreateArticleDTO articleDTO, @RequestParam String authorId) {
+    public ResponseEntity<GetArticleDTO> createArticle(@Valid @RequestBody CreateArticleDTO articleDTO, Authentication authentication) {
         if (articleDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        String authorEmail = authentication.getName();
 
-        GetArticleDTO createdArticle = articleService.createArticle(articleDTO, authorId);
+        GetArticleDTO createdArticle = articleService.createArticle(articleDTO, authorEmail);
         return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
     }
 
