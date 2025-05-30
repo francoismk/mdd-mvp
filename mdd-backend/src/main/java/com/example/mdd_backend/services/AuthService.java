@@ -22,13 +22,24 @@ public class AuthService {
     }
 
     public JWTResponseDTO authenticateAndGenerateToken(LoginUserDTO loginUserDTO) {
-        Authentication authentication = authenticationManager.authenticate(
+        System.out.println("=== LOGIN REQUEST RECEIVED ===");
+        System.out.println("Email " + loginUserDTO.getUsernameOrEmail());
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginUserDTO.getUsernameOrEmail(),
                         loginUserDTO.getPassword()
                 ));
+                System.out.println("LOGIN SUCCESS ??");
 
                 return jwtService.getToken(authentication);
+        } catch (Exception e) {
+            System.out.println("=== LOGIN FAILED ===");
+            System.out.println("ERROR : " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     public JWTResponseDTO registerAndGenerateToken(CreateUserDTO userDTO) {

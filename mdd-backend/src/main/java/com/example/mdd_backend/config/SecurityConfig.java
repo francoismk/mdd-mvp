@@ -26,13 +26,15 @@ public class SecurityConfig {
                     SessionCreationPolicy.STATELESS
                 )
             )
-            // .httpBasic(Customizer.withDefaults())
             .authorizeHttpRequests(auth ->
                 auth
-                    .requestMatchers("/api/**")
-                    .permitAll()
+                    .requestMatchers("/api/auth/**").permitAll()
+                    .requestMatchers("/swagger-ui.html").permitAll()
+                    .requestMatchers("/swagger-ui/**").permitAll()
+                    .requestMatchers("/v3/api-docs").permitAll()
+                    .requestMatchers("/v3/api-docs/**").permitAll()
                     .anyRequest()
-                    .permitAll()
+                    .authenticated()
             ).oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer ->
                         jwtConfigurer.jwtAuthenticationConverter(new JwtAuthenticationConverter())
             ));

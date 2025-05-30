@@ -4,7 +4,6 @@ import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.JWTResponseDTO;
 import com.example.mdd_backend.dtos.LoginUserDTO;
 import com.example.mdd_backend.services.AuthService;
-import com.example.mdd_backend.services.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
