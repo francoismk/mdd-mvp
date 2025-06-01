@@ -3,10 +3,11 @@ package com.example.mdd_backend.services;
 import com.example.mdd_backend.dtos.*;
 import com.example.mdd_backend.models.DBArticle;
 import com.example.mdd_backend.repositories.ArticleRepository;
+import com.example.mdd_backend.services.articleSorting.ArticleSortStrategy;
+import com.example.mdd_backend.services.articleSorting.SortType;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -19,17 +20,19 @@ public class ArticleService {
     private static final Logger logger = LoggerFactory.getLogger(ArticleService.class);
 
     private final ArticleRepository articleRepository;
+    private final List<ArticleSortStrategy> sortStrategies;
     private final ModelMapper modelMapper;
     private final UserService userService;
     private final TopicService topicService;
     private final CommentService commentService;
 
-    public ArticleService(ArticleRepository articleRepository, ModelMapper modelMapper, UserService userService, TopicService topicService, CommentService commentService) {
+    public ArticleService(ArticleRepository articleRepository, ModelMapper modelMapper, UserService userService, TopicService topicService, CommentService commentService, List<ArticleSortStrategy> sortStrategies) {
         this.articleRepository = articleRepository;
         this.modelMapper = modelMapper;
         this.userService = userService;
         this.topicService = topicService;
         this.commentService = commentService;
+        this.sortStrategies = sortStrategies;
     }
 
     public GetArticleDTO getArticleById(String articleId) {
@@ -55,11 +58,17 @@ public class ArticleService {
                 .toList();
     }
 
-    public List<GetArticleDTO> getArticlesSorted(String sortOder) {
-        Sort sort  = sortOder.equals("asc")
-                ? Sort.by(Sort.Direction.ASC, "createdAt")
-                : Sort.by(Sort.Direction.DESC, "createdAt");
-        List<DBArticle> articles = articleRepository.findAll(sort);
+    public List<GetArticleDTO> getArticlesSorted(String sortKey) {
+        SortType sortType = SortType.fromString(sortKey);
+
+        ArticleSortStrategy strategy = sortStrategies
+                .stream()
+                .filter(s -> s.supports(sortType))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Unsupported sort type: " + sortKey));
+
+        List<DBArticle> articles = articleRepository.findAll(strategy.getSort());
+
         return articles
                 .stream()
                 .map(this::getArticleDTO)
@@ -71,7 +80,7 @@ public class ArticleService {
 
         GetUserDTO user = userService.getUserByEmail(authorEmail);
         article.setAuthorId(user.getId());
-        article.setDate(new Date());
+        article.setCreatedAt(new Date());
 
 
         DBArticle savedArticle = articleRepository.save(article);

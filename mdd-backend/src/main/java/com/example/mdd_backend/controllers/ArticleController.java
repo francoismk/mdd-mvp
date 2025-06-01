@@ -37,10 +37,10 @@ public class ArticleController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetArticleDTO>> getAllArticles(@RequestParam(name = "sort", defaultValue = "asc") String sortOrder) {
+    public ResponseEntity<List<GetArticleDTO>> getAllArticles(@RequestParam(name = "sort", defaultValue = "date_asc") String sortOrder) {
         List<GetArticleDTO> articles = articleService.getArticlesSorted(sortOrder);
 
-        if (articles == null) {
+        if (articles == null || articles.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(articles, HttpStatus.OK);
