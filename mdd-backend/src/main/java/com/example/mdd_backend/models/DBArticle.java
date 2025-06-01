@@ -15,7 +15,7 @@ public class DBArticle {
 
     private String title;
     private String content;
-    private Date date;
+    private Date createdAt;
     private String authorId;
     private String topicId;
 }

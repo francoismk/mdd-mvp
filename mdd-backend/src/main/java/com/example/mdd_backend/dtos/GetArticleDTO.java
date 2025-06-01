@@ -12,7 +12,7 @@ public class GetArticleDTO {
     private String id;
     private String title;
     private String content;
-    private Date date;
+    private Date createdAt;
     private GetUserDTO author;
     private GetTopicDTO topic;
     private List<GetCommentDTO> comments;
