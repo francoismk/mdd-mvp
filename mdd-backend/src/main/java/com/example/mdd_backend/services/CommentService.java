@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 @Service
@@ -56,14 +55,9 @@ public class CommentService {
 
         comment.setArticleId(articleId);
         comment.setAuthorId(user.getId());
-        comment.setDate(new Date());
+        comment.setCreatedAt(new Date());
         DBComment savedComment = commentRepository.save(comment);
 
-        if(article.getComments() == null) {
-            article.setComments(new ArrayList<>());
-        }
-        article.getComments().add(savedComment.getId());
-        articleRepository.save(article);
         return getCommentDTO(savedComment);
     }
 
@@ -78,6 +72,14 @@ public class CommentService {
         GetCommentDTO commentDTO = modelMapper.map(comment, GetCommentDTO.class);
         commentDTO.setAuthor(userService.getUserById(comment.getAuthorId()));
         return commentDTO;
+    }
+
+    public List<GetCommentDTO> getCommentsByArticleId(String articleId) {
+        return commentRepository
+            .findByArticleId(articleId)
+            .stream()
+            .map(this::getCommentDTO)
+            .toList();
     }
 
 

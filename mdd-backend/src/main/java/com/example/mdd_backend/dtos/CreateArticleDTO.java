@@ -14,6 +14,6 @@ public class CreateArticleDTO {
     @NotNull(message = "Content is required")
     private String content;
 
-    @NotNull(message = "Theme ID is required")
-    private String themeId;
+    @NotNull(message = "Topic ID is required")
+    private String topicId;
 }

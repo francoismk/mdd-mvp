@@ -15,5 +15,5 @@ public class DBComment {
     private String content;
     private String authorId;
     private String articleId;
-    private Date date;
+    private Date createdAt;
 }
