@@ -2,6 +2,7 @@ package com.example.mdd_backend.controllers;
 
 import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.GetUserDTO;
+import com.example.mdd_backend.dtos.UpdateUserDTO;
 import com.example.mdd_backend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -44,7 +45,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<GetUserDTO> createUser(
-        @Valid @RequestBody CreateUserDTO userDTO
+            @Valid @RequestBody CreateUserDTO userDTO
     ) {
         GetUserDTO createdUser = userService.createUser(userDTO);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
@@ -70,4 +71,11 @@ public class UserController {
         GetUserDTO user = userService.unsuscribeUserToTheme(themeId, userId);
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<GetUserDTO> updateUser(@PathVariable String id, @RequestBody UpdateUserDTO updateUserDTO) {
+        GetUserDTO updatedUser = userService.updateUser(id, updateUserDTO);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
 }
