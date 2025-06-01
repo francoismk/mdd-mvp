@@ -3,6 +3,7 @@ package com.example.mdd_backend.services;
 import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.GetTopicDTO;
 import com.example.mdd_backend.dtos.GetUserDTO;
+import com.example.mdd_backend.dtos.UpdateUserDTO;
 import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
 import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
 import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
@@ -221,6 +222,36 @@ public class UserService {
         } catch (Exception e) {
             logger.error("Error deleting user with ID {}: {}", userId, e.getMessage(), e);
             throw new DatabaseOperationException("Failed to delete user");
+        }
+    }
+
+    public GetUserDTO updateUser(String userId, UpdateUserDTO updateUserDTO) {
+        try {
+            DBUser user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+
+            if (updateUserDTO.getEmail() != null && !updateUserDTO.getEmail().equals(user.getEmail())) {
+                if (userRepository.findByEmail(updateUserDTO.getEmail()).isPresent()) {
+                    throw new DuplicateResourceException("Email already exists");
+                }
+                user.setEmail(updateUserDTO.getEmail());
+            }
+
+            if (updateUserDTO.getUsername() != null) {
+                user.setUsername(updateUserDTO.getUsername());
+            }
+
+            if (updateUserDTO.getPassword() != null) {
+                user.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
+            }
+
+            DBUser savedUser = userRepository.save(user);
+            return buildUserDto(savedUser);
+        } catch (ResourceNotFoundException | DuplicateResourceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error while update user: {}", e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to update user");
         }
     }
 }
