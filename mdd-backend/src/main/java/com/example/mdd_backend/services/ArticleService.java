@@ -1,6 +1,8 @@
 package com.example.mdd_backend.services;
 
 import com.example.mdd_backend.dtos.*;
+import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
+import com.example.mdd_backend.errors.exceptions.ResourceNotFoundException;
 import com.example.mdd_backend.models.DBArticle;
 import com.example.mdd_backend.repositories.ArticleRepository;
 import com.example.mdd_backend.services.articleSorting.ArticleSortStrategy;
@@ -12,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Service
 public class ArticleService {
@@ -36,79 +37,102 @@ public class ArticleService {
     }
 
     public GetArticleDTO getArticleById(String articleId) {
+        try {
+            DBArticle dbArticle = articleRepository.findById(articleId).orElseThrow(() ->
+                    new ResourceNotFoundException("Article not found with ID : " + articleId));
+            return getArticleDTO(dbArticle);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving article with ID: {}", articleId, e);
+            throw new BusinessLogicException("Failed to retrieve article");
+        }
 
-        DBArticle dbArticle = articleRepository.findById(articleId).orElseThrow(() ->
-                new NoSuchElementException("Article not found with ID : " + articleId));
-        return getArticleDTO(dbArticle);
-    }
-
-    public List<GetArticleDTO> getAllArticles() {
-        List<DBArticle> articles = articleRepository.findAll();
-        return articles
-                .stream()
-                .map(this::getArticleDTO)
-                .toList();
-    }
-
-    public List<GetArticleDTO> getArticlesByThemeId(String themeId) {
-        List<DBArticle> articles = articleRepository.findByTopicId(themeId);
-        return articles
-                .stream()
-                .map(this::getArticleDTO)
-                .toList();
     }
 
     public List<GetArticleDTO> getArticlesSorted(String sortKey) {
-        SortType sortType = SortType.fromString(sortKey);
+        try {
+            SortType sortType = SortType.fromString(sortKey);
 
-        ArticleSortStrategy strategy = sortStrategies
-                .stream()
-                .filter(s -> s.supports(sortType))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("Unsupported sort type: " + sortKey));
+            ArticleSortStrategy strategy = sortStrategies
+                    .stream()
+                    .filter(s -> s.supports(sortType))
+                    .findFirst()
+                    .orElseThrow(() -> new BusinessLogicException("Unsupported sort type: " + sortKey));
 
-        List<DBArticle> articles = articleRepository.findAll(strategy.getSort());
+            List<DBArticle> articles = articleRepository.findAll(strategy.getSort());
 
-        return articles
-                .stream()
-                .map(this::getArticleDTO)
-                .toList();
+            return articles
+                    .stream()
+                    .map(this::getArticleDTO)
+                    .toList();
+        } catch (BusinessLogicException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving articles with sort key: {}: {}", sortKey, e.getMessage());
+            throw new BusinessLogicException("Failed to retrieve articles");
+        }
     }
 
     public GetArticleDTO createArticle(CreateArticleDTO articleDTO, String authorEmail) {
-        DBArticle article = modelMapper.map(articleDTO, DBArticle.class);
+        try {
+            DBArticle article = modelMapper.map(articleDTO, DBArticle.class);
 
-        GetUserDTO user = userService.getUserByEmail(authorEmail);
-        article.setAuthorId(user.getId());
-        article.setCreatedAt(new Date());
-
-
-        DBArticle savedArticle = articleRepository.save(article);
+            GetUserDTO user = userService.getUserByEmail(authorEmail);
+            article.setAuthorId(user.getId());
+            article.setCreatedAt(new Date());
 
 
-        return getArticleDTO(savedArticle);
+            DBArticle savedArticle = articleRepository.save(article);
+
+
+            return getArticleDTO(savedArticle);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error creating article for user {}: {}", authorEmail, e.getMessage(), e);
+            throw new BusinessLogicException("Failed to create article");
+        }
+
     }
 
     public void deleteArticle(String articleId) {
-        articleRepository
-                .findById(articleId)
-                .orElseThrow(() ->
-                        new NoSuchElementException("Article not found with ID : " + articleId));
-        articleRepository.deleteById(articleId);
+        try {
+            articleRepository
+                    .findById(articleId)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException("Article not found with ID : " + articleId));
+            articleRepository.deleteById(articleId);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting article with ID {}: {}", articleId, e.getMessage(), e);
+            throw new BusinessLogicException("Failed to delete article");
+        }
+
     }
 
     private GetArticleDTO getArticleDTO(DBArticle article) {
-        GetArticleDTO articleDTO = modelMapper.map(article, GetArticleDTO.class);
+        try{
+            GetArticleDTO articleDTO = modelMapper.map(article, GetArticleDTO.class);
 
-        GetUserDTO author = userService.getUserById(article.getAuthorId());
-        articleDTO.setAuthor(author);
+            GetUserDTO author = userService.getUserById(article.getAuthorId());
+            articleDTO.setAuthor(author);
 
-        GetTopicDTO topic = topicService.getTopicById(article.getTopicId());
-        articleDTO.setTopic(topic);
+            GetTopicDTO topic = topicService.getTopicById(article.getTopicId());
+            articleDTO.setTopic(topic);
 
-        List<GetCommentDTO> comments = commentService.getCommentsByArticleId(article.getId());
-        articleDTO.setComments(comments);
+            List<GetCommentDTO> comments = commentService.getCommentsByArticleId(article.getId());
+            articleDTO.setComments(comments);
 
-        return articleDTO;
+            return articleDTO;
+        } catch (ResourceNotFoundException e) {
+            logger.error("Resource not found while mapping article to DTO: {}", e.getMessage(), e);
+            throw new BusinessLogicException("Resource not found while mapping article to DTO");
+        } catch (Exception e) {
+            logger.error("Error mapping article DTO for article {}: {}",article.getId(), e.getMessage(), e);
+            throw new BusinessLogicException("Failed to map article to DTO");
+        }
+
     }
 }

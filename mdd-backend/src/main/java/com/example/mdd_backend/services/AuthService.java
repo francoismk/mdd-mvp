@@ -3,6 +3,11 @@ package com.example.mdd_backend.services;
 import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.JWTResponseDTO;
 import com.example.mdd_backend.dtos.LoginUserDTO;
+import com.example.mdd_backend.errors.exceptions.AuthenticationException;
+import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -10,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthService {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -22,28 +29,30 @@ public class AuthService {
     }
 
     public JWTResponseDTO authenticateAndGenerateToken(LoginUserDTO loginUserDTO) {
-        System.out.println("=== LOGIN REQUEST RECEIVED ===");
-        System.out.println("Email " + loginUserDTO.getUsernameOrEmail());
-
         try {
             Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginUserDTO.getUsernameOrEmail(),
-                        loginUserDTO.getPassword()
-                ));
-                System.out.println("LOGIN SUCCESS ??");
+                    new UsernamePasswordAuthenticationToken(
+                            loginUserDTO.getUsernameOrEmail(),
+                            loginUserDTO.getPassword()
+                    ));
 
-                return jwtService.getToken(authentication);
+            return jwtService.getToken(authentication);
         } catch (Exception e) {
-            System.out.println("=== LOGIN FAILED ===");
-            System.out.println("ERROR : " + e.getMessage());
-            e.printStackTrace();
-            throw e;
+            logger.warn("Authentication failed for user: {}", loginUserDTO.getUsernameOrEmail());
+            throw new AuthenticationException("Invalid credentials");
         }
     }
 
     public JWTResponseDTO registerAndGenerateToken(CreateUserDTO userDTO) {
-        userService.createUser(userDTO);
-        return jwtService.getTokenFromUserIdentifier(userDTO.getEmail());
+        try {
+            userService.createUser(userDTO);
+            return jwtService.getTokenFromUserIdentifier(userDTO.getEmail());
+        } catch (DuplicateKeyException e) {
+            logger.warn("Registration failed: User with email {} already exists", userDTO.getEmail());
+            throw new DuplicateResourceException("Registration failed: ");
+        } catch (Exception e) {
+            logger.error("Registration failed for user: {}", userDTO.getEmail(), e);
+            throw new AuthenticationException("Registration failed: ");
+        }
     }
 }

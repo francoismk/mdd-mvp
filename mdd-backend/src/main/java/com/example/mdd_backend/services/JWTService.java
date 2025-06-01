@@ -1,6 +1,9 @@
 package com.example.mdd_backend.services;
 
 import com.example.mdd_backend.dtos.JWTResponseDTO;
+import com.example.mdd_backend.errors.exceptions.AuthenticationException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwsHeader;
@@ -15,6 +18,8 @@ import java.time.temporal.ChronoUnit;
 @Service
 public class JWTService {
 
+    private static final Logger logger = LoggerFactory.getLogger(JWTService.class);
+
     private final JwtEncoder jwtEncoder;
 
     public JWTService(JwtEncoder jwtEncoder) {
@@ -24,12 +29,24 @@ public class JWTService {
     // While authentication
     public JWTResponseDTO getToken(Authentication authentication) {
         // authentication.getName() return the email of the user
-        return generateToken(authentication.getName());
+        try {
+            return generateToken(authentication.getName());
+        } catch (Exception e) {
+            logger.error("Error generating JWT token for user: {}", authentication.getName(), e);
+            throw new AuthenticationException("Failed to generate JWT token");
+        }
     }
 
     // while registration
     public JWTResponseDTO getTokenFromUserIdentifier(String userIdentifier) {
-        return generateToken(userIdentifier);
+
+        try {
+            return generateToken(userIdentifier);
+        } catch (Exception e) {
+            logger.error("Error generating JWT token for user identifier: {}", userIdentifier, e);
+            throw new AuthenticationException("failed to generate JWT token");
+        }
+
     }
 
     private JWTResponseDTO generateToken(String subject) {

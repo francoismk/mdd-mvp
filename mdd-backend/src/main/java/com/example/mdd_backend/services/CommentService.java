@@ -3,11 +3,16 @@ package com.example.mdd_backend.services;
 import com.example.mdd_backend.dtos.CreateCommentDTO;
 import com.example.mdd_backend.dtos.GetCommentDTO;
 import com.example.mdd_backend.dtos.GetUserDTO;
+import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
+import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
+import com.example.mdd_backend.errors.exceptions.ResourceNotFoundException;
 import com.example.mdd_backend.models.DBArticle;
 import com.example.mdd_backend.models.DBComment;
 import com.example.mdd_backend.repositories.ArticleRepository;
 import com.example.mdd_backend.repositories.CommentRepository;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -16,6 +21,8 @@ import java.util.NoSuchElementException;
 
 @Service
 public class CommentService {
+
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     private final CommentRepository commentRepository;
     private final ArticleRepository articleRepository;
@@ -30,56 +37,96 @@ public class CommentService {
     }
 
     public GetCommentDTO getCommentById(String id) {
-        return commentRepository
-            .findById(id)
-            .map(this::getCommentDTO)
-            .orElseThrow(() -> new NoSuchElementException("Comment not found with ID: " + id));
+        try {
+            return commentRepository
+                    .findById(id)
+                    .map(this::getCommentDTO)
+                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + id));
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error retrieving comment with ID: {}", id, e);
+            throw new NoSuchElementException("Failed to retrieve comment");
+        }
+
     }
 
     public List<GetCommentDTO> getAllComments() {
-        return commentRepository
-            .findAll()
-            .stream()
-            .map(this::getCommentDTO)
-            .toList();
+        try {
+            return commentRepository
+                    .findAll()
+                    .stream()
+                    .map(this::getCommentDTO)
+                    .toList();
+        } catch (Exception e) {
+            logger.error("Error retrieving all comments: {}", e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to retrieve comments");
+        }
     }
 
     public GetCommentDTO createComment(CreateCommentDTO createCommentDTO, String articleId, String authorEmail) {
-        DBArticle article = articleRepository.findById(articleId).orElseThrow(
-            () -> new NoSuchElementException("Article not found with ID: " + articleId)
-        );
+        try {
+            DBArticle article = articleRepository.findById(articleId).orElseThrow(
+                    () -> new ResourceNotFoundException("Article not found with ID: " + articleId)
+            );
 
-        DBComment comment = modelMapper.map(createCommentDTO, DBComment.class);
+            DBComment comment = modelMapper.map(createCommentDTO, DBComment.class);
 
-        GetUserDTO user = userService.getUserByEmail(authorEmail);
+            GetUserDTO user = userService.getUserByEmail(authorEmail);
 
-        comment.setArticleId(articleId);
-        comment.setAuthorId(user.getId());
-        comment.setCreatedAt(new Date());
-        DBComment savedComment = commentRepository.save(comment);
+            comment.setArticleId(articleId);
+            comment.setAuthorId(user.getId());
+            comment.setCreatedAt(new Date());
+            DBComment savedComment = commentRepository.save(comment);
 
-        return getCommentDTO(savedComment);
+            return getCommentDTO(savedComment);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error creating comment for article {}: {}",articleId, e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to create comment");
+        }
     }
 
     public void deleteComment(String id) {
-        commentRepository
-            .findById(id)
-            .orElseThrow(() -> new NoSuchElementException("Comment not found with ID: " + id));
-        commentRepository.deleteById(id);
+        try {
+            commentRepository
+                    .findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Comment not found with ID: " + id));
+            commentRepository.deleteById(id);
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error deleting comment with ID {}: {}", id, e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to delete comment");
+        }
     }
 
     private GetCommentDTO getCommentDTO(DBComment comment) {
-        GetCommentDTO commentDTO = modelMapper.map(comment, GetCommentDTO.class);
-        commentDTO.setAuthor(userService.getUserById(comment.getAuthorId()));
-        return commentDTO;
+        try {
+            GetCommentDTO commentDTO = modelMapper.map(comment, GetCommentDTO.class);
+            commentDTO.setAuthor(userService.getUserById(comment.getAuthorId()));
+            return commentDTO;
+        } catch (ResourceNotFoundException e) {
+            logger.error("Author not found for comment {}: {}", comment.getId(), e.getMessage(), e);
+            throw new BusinessLogicException("Failed to retrieve comment author");
+        } catch (Exception e) {
+            logger.error("Error mapping comment DTO for comment {}: {}", comment.getId(), e.getMessage(), e);
+            throw new BusinessLogicException("Failed to map comment to DTO");
+        }
     }
 
     public List<GetCommentDTO> getCommentsByArticleId(String articleId) {
-        return commentRepository
-            .findByArticleId(articleId)
-            .stream()
-            .map(this::getCommentDTO)
-            .toList();
+        try {
+            return commentRepository
+                    .findByArticleId(articleId)
+                    .stream()
+                    .map(this::getCommentDTO)
+                    .toList();
+        } catch (Exception e) {
+            logger.error("Error retrieving comments for article {}: {}", articleId, e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to retrieve comments for article");
+        }
     }
 
 
