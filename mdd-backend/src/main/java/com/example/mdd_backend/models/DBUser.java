@@ -1,5 +1,6 @@
 package com.example.mdd_backend.models;
 
+import java.util.Date;
 import java.util.List;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
@@ -20,5 +21,7 @@ public class DBUser {
     private String username;
 
     private String password;
-    private List<String> subscriptions;
+    private List<String> subscribedTopicIds;
+
+    private Date createdAt;
 }

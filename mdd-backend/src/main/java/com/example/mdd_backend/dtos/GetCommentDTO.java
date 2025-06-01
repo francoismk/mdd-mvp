@@ -11,6 +11,6 @@ public class GetCommentDTO {
 
     private String id;
     private String content;
-    private Date date;
+    private Date createdAt;
     private GetUserDTO author;
 }

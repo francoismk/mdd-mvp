@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
-@Document(collection = "themes")
-public class DBTheme {
+@Document(collection = "topics")
+public class DBTopic {
 
     @Id
     private String id;

@@ -14,6 +14,6 @@ public class GetArticleDTO {
     private String content;
     private Date date;
     private GetUserDTO author;
-    private GetThemeDTO theme;
+    private GetTopicDTO topic;
     private List<GetCommentDTO> comments;
 }

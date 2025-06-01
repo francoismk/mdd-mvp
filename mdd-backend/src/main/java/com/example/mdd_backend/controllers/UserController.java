@@ -59,13 +59,8 @@ public class UserController {
 
     @PostMapping("/{themeId}/subscriptions")
     public ResponseEntity<GetUserDTO> subscribeToTheme(@PathVariable String themeId, Authentication authentication, HttpServletRequest request) {
-        logger.info("=== Auth header: {}", request.getHeader("Authorization"));
-        logger.info("=== Authentication: {}", authentication);
-        logger.info("=== Principal: {}", authentication.getPrincipal());
-        logger.info("=== Name: '{}'", authentication.getName());
         String userId = authentication.getName();
         GetUserDTO user = userService.subscribeUserToTheme(themeId, userId);
-        logger.info("=== LE RETOUR du service ===> ", user);
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 

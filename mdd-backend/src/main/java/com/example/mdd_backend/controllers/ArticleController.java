@@ -4,6 +4,8 @@ import com.example.mdd_backend.dtos.CreateArticleDTO;
 import com.example.mdd_backend.dtos.GetArticleDTO;
 import com.example.mdd_backend.services.ArticleService;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,6 +16,8 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
+
+    private final Logger logger = LoggerFactory.getLogger(ArticleController.class);
 
     private final ArticleService articleService;
 

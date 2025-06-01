@@ -17,6 +17,5 @@ public class DBArticle {
     private String content;
     private Date date;
     private String authorId;
-    private String themeId;
-    private List<String> comments;
+    private String topicId;
 }

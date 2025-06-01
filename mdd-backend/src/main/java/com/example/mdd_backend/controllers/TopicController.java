@@ -1,8 +1,8 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.CreateThemeDTO;
-import com.example.mdd_backend.dtos.GetThemeDTO;
-import com.example.mdd_backend.services.ThemeService;
+import com.example.mdd_backend.dtos.CreateTopicDTO;
+import com.example.mdd_backend.dtos.GetTopicDTO;
+import com.example.mdd_backend.services.TopicService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -16,30 +16,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/themes")
-public class ThemeController {
+@RequestMapping("/api/topics")
+public class TopicController {
 
-    private final ThemeService themeService;
+    private final TopicService topicService;
 
-    public ThemeController(ThemeService themeService) {
-        this.themeService = themeService;
+    public TopicController(TopicService topicService) {
+        this.topicService = topicService;
     }
 
     @PostMapping
-    public ResponseEntity<GetThemeDTO> createTheme(
-        @Valid @RequestBody CreateThemeDTO themeDTO
+    public ResponseEntity<GetTopicDTO> createTheme(
+        @Valid @RequestBody CreateTopicDTO topicDTO
     ) {
-        if (themeDTO == null) {
+        if (topicDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        GetThemeDTO createdTheme = themeService.createTheme(themeDTO);
+        GetTopicDTO createdTheme = topicService.createTopic(topicDTO);
         return new ResponseEntity<>(createdTheme, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetThemeDTO> getThemeById(@PathVariable String id) {
-        GetThemeDTO theme = themeService.getThemeById(id);
+    public ResponseEntity<GetTopicDTO> getThemeById(@PathVariable String id) {
+        GetTopicDTO theme = topicService.getTopicById(id);
 
         if (theme == null) {
             return ResponseEntity.notFound().build();
@@ -48,8 +48,8 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetThemeDTO>> getAllThemes() {
-        List<GetThemeDTO> themes = themeService.getAllThemes();
+    public ResponseEntity<List<GetTopicDTO>> getAllThemes() {
+        List<GetTopicDTO> themes = topicService.getAllTopics();
 
         if (themes == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -59,7 +59,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteThemeById(@PathVariable String id) {
-        themeService.deleteTheme(id);
+        topicService.deleteTheme(id);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

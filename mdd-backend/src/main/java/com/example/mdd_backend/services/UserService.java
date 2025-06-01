@@ -1,11 +1,11 @@
 package com.example.mdd_backend.services;
 
 import com.example.mdd_backend.dtos.CreateUserDTO;
-import com.example.mdd_backend.dtos.GetThemeDTO;
+import com.example.mdd_backend.dtos.GetTopicDTO;
 import com.example.mdd_backend.dtos.GetUserDTO;
-import com.example.mdd_backend.models.DBTheme;
+import com.example.mdd_backend.models.DBTopic;
 import com.example.mdd_backend.models.DBUser;
-import com.example.mdd_backend.repositories.ThemeRepository;
+import com.example.mdd_backend.repositories.TopicRepository;
 import com.example.mdd_backend.repositories.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,20 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * The type User service.
+ */
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
-    private final ThemeRepository themeRepository;
+    private final TopicRepository themeRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
 
     public UserService(
         UserRepository userRepository,
-        ThemeRepository themeRepository,
+        TopicRepository themeRepository,
         PasswordEncoder passwordEncoder,
         ModelMapper modelMapper
     ) {
@@ -36,6 +39,12 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
+    /**
+     * Create user get user dto.
+     *
+     * @param userDTO the user dto
+     * @return the get user dto
+     */
     public GetUserDTO createUser(CreateUserDTO userDTO) {
         DBUser user = modelMapper.map(userDTO, DBUser.class);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -79,18 +88,18 @@ public class UserService {
         GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
 
         if (
-            user.getSubscriptions() != null &&
-            !user.getSubscriptions().isEmpty()
+            user.getSubscribedTopicIds() != null &&
+            !user.getSubscribedTopicIds().isEmpty()
         ) {
-            List<GetThemeDTO> themeDTOs = user
-                .getSubscriptions()
+            List<GetTopicDTO> themeDTOs = user
+                .getSubscribedTopicIds()
                 .stream()
                 .map(themeId -> {
-                    Optional<DBTheme> themeOptional = themeRepository.findById(
+                    Optional<DBTopic> themeOptional = themeRepository.findById(
                         themeId
                     );
                     return themeOptional
-                        .map(theme -> modelMapper.map(theme, GetThemeDTO.class))
+                        .map(theme -> modelMapper.map(theme, GetTopicDTO.class))
                         .orElse(null);
                 })
                 .filter(themeDTO -> themeDTO != null)
@@ -109,18 +118,18 @@ public class UserService {
                 () -> new NoSuchElementException(
                     "User not found with email : " + userEmail
                 ));
-        DBTheme theme = themeRepository
+        DBTopic theme = themeRepository
             .findById(themeId)
             .orElseThrow(() ->
                 new NoSuchElementException(
                     "theme not found with ID : " + themeId
                 )
             );
-        List<String> themeExisting = user.getSubscriptions();
+        List<String> themeExisting = user.getSubscribedTopicIds();
 
         if (themeExisting == null) {
             themeExisting = new ArrayList<>();
-            user.setSubscriptions(themeExisting);
+            user.setSubscribedTopicIds(themeExisting);
         }
 
         if (!themeExisting.contains(theme.getId())) {
@@ -138,7 +147,7 @@ public class UserService {
                 new NoSuchElementException("User not found with ID : " + userEmail)
             );
 
-        List<String> subscriptions = user.getSubscriptions();
+        List<String> subscriptions = user.getSubscribedTopicIds();
         if (subscriptions != null) {
             boolean removed = subscriptions.remove(themeId);
             if (removed) {

@@ -12,5 +12,5 @@ public class GetUserDTO {
     private String id;
     private String email;
     private String username;
-    private List<GetThemeDTO> subscriptions;
+    private List<GetTopicDTO> subscriptions;
 }
