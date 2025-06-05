@@ -2,7 +2,7 @@ package com.example.mdd_backend.services;
 
 import com.example.mdd_backend.dtos.CommentCreateRequestDTO;
 import com.example.mdd_backend.dtos.CommentResponseDTO;
-import com.example.mdd_backend.dtos.GetUserDTO;
+import com.example.mdd_backend.dtos.UserResponseDTO;
 import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
 import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
 import com.example.mdd_backend.errors.exceptions.ResourceNotFoundException;
@@ -96,7 +96,7 @@ public class CommentService {
                 DBComment.class
             );
 
-            GetUserDTO user = userService.getUserByEmail(authorEmail);
+            UserResponseDTO user = userService.getUserByEmail(authorEmail);
 
             comment.setArticleId(articleId);
             comment.setAuthorId(user.getId());

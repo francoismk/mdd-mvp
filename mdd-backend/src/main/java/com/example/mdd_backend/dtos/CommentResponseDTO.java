@@ -11,5 +11,5 @@ public class CommentResponseDTO {
     private String id;
     private String content;
     private Date createdAt;
-    private GetUserDTO author;
+    private UserResponseDTO author;
 }

@@ -1,9 +1,9 @@
 package com.example.mdd_backend.services;
 
-import com.example.mdd_backend.dtos.CreateUserDTO;
-import com.example.mdd_backend.dtos.GetUserDTO;
 import com.example.mdd_backend.dtos.TopicResponseDTO;
-import com.example.mdd_backend.dtos.UpdateUserDTO;
+import com.example.mdd_backend.dtos.UserCreateRequestDTO;
+import com.example.mdd_backend.dtos.UserResponseDTO;
+import com.example.mdd_backend.dtos.UserUpdateRequestDTO;
 import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
 import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
 import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
@@ -51,13 +51,13 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
-    public GetUserDTO createUser(CreateUserDTO userDTO) {
+    public UserResponseDTO createUser(UserCreateRequestDTO userDTO) {
         try {
             DBUser user = modelMapper.map(userDTO, DBUser.class);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             DBUser savedUser = userRepository.save(user);
-            return modelMapper.map(savedUser, GetUserDTO.class);
+            return modelMapper.map(savedUser, UserResponseDTO.class);
         } catch (DuplicateKeyException e) {
             logger.warn(
                 "User creation failed: Email or username already exists: {}",
@@ -72,7 +72,7 @@ public class UserService {
         }
     }
 
-    public List<GetUserDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         try {
             List<DBUser> users = userRepository.findAll();
             return users
@@ -87,7 +87,7 @@ public class UserService {
         }
     }
 
-    public GetUserDTO getUserById(String id) {
+    public UserResponseDTO getUserById(String id) {
         try {
             DBUser user = userRepository
                 .findById(id)
@@ -111,7 +111,7 @@ public class UserService {
         }
     }
 
-    public GetUserDTO getUserByEmail(String email) {
+    public UserResponseDTO getUserByEmail(String email) {
         try {
             DBUser user = userRepository
                 .findByEmail(email)
@@ -135,9 +135,12 @@ public class UserService {
         }
     }
 
-    private GetUserDTO buildUserDto(DBUser user) {
+    private UserResponseDTO buildUserDto(DBUser user) {
         try {
-            GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
+            UserResponseDTO userDTO = modelMapper.map(
+                user,
+                UserResponseDTO.class
+            );
 
             if (
                 user.getSubscribedTopicIds() != null &&
@@ -181,7 +184,10 @@ public class UserService {
         }
     }
 
-    public GetUserDTO subscribeUserToTheme(String themeId, String userEmail) {
+    public UserResponseDTO subscribeUserToTheme(
+        String themeId,
+        String userEmail
+    ) {
         try {
             DBUser user = userRepository
                 .findByEmail(userEmail)
@@ -224,7 +230,10 @@ public class UserService {
         }
     }
 
-    public GetUserDTO unsuscribeUserToTheme(String themeId, String userEmail) {
+    public UserResponseDTO unsuscribeUserToTheme(
+        String themeId,
+        String userEmail
+    ) {
         try {
             DBUser user = userRepository
                 .findByEmail(userEmail)
@@ -280,7 +289,10 @@ public class UserService {
         }
     }
 
-    public GetUserDTO updateUser(String userId, UpdateUserDTO updateUserDTO) {
+    public UserResponseDTO updateUser(
+        String userId,
+        UserUpdateRequestDTO updateUserDTO
+    ) {
         try {
             DBUser user = userRepository
                 .findById(userId)

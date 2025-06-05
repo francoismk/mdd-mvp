@@ -100,7 +100,7 @@ public class ArticleService {
         try {
             DBArticle article = modelMapper.map(articleDTO, DBArticle.class);
 
-            GetUserDTO user = userService.getUserByEmail(authorEmail);
+            UserResponseDTO user = userService.getUserByEmail(authorEmail);
             article.setAuthorId(user.getId());
             article.setCreatedAt(new Date());
 
@@ -150,7 +150,9 @@ public class ArticleService {
                 ArticleResponseDTO.class
             );
 
-            GetUserDTO author = userService.getUserById(article.getAuthorId());
+            UserResponseDTO author = userService.getUserById(
+                article.getAuthorId()
+            );
             articleDTO.setAuthor(author);
 
             TopicResponseDTO topic = topicService.getTopicById(

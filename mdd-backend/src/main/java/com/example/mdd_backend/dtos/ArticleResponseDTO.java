@@ -13,7 +13,7 @@ public class ArticleResponseDTO {
     private String title;
     private String content;
     private Date createdAt;
-    private GetUserDTO author;
+    private UserResponseDTO author;
     private TopicResponseDTO topic;
     private List<CommentResponseDTO> comments;
 }

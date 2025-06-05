@@ -1,8 +1,8 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.CreateUserDTO;
 import com.example.mdd_backend.dtos.JWTResponseDTO;
 import com.example.mdd_backend.dtos.LoginUserDTO;
+import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.services.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,14 +20,20 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<JWTResponseDTO>createUser(@Valid @RequestBody CreateUserDTO userDTO) {
+    public ResponseEntity<JWTResponseDTO> createUser(
+        @Valid @RequestBody UserCreateRequestDTO userDTO
+    ) {
         JWTResponseDTO token = authService.registerAndGenerateToken(userDTO);
         return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JWTResponseDTO> loginUser(@Valid @RequestBody LoginUserDTO loginUserDTO) {
-        JWTResponseDTO token = authService.authenticateAndGenerateToken(loginUserDTO);
+    public ResponseEntity<JWTResponseDTO> loginUser(
+        @Valid @RequestBody LoginUserDTO loginUserDTO
+    ) {
+        JWTResponseDTO token = authService.authenticateAndGenerateToken(
+            loginUserDTO
+        );
 
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
