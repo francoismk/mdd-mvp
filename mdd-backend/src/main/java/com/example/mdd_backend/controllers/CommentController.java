@@ -3,6 +3,7 @@ package com.example.mdd_backend.controllers;
 import com.example.mdd_backend.dtos.CommentCreateRequestDTO;
 import com.example.mdd_backend.dtos.CommentResponseDTO;
 import com.example.mdd_backend.services.CommentService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/comments")
+@Tag(name = "Comments", description = "Comment management operations")
 public class CommentController {
 
     private final CommentService commentService;

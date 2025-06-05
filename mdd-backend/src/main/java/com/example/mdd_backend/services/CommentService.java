@@ -18,6 +18,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing article comments.
+ *
+ * Handles comment creation, retrieval and deletion operations.
+ */
 @Service
 public class CommentService {
 
@@ -42,6 +47,14 @@ public class CommentService {
         this.articleRepository = articleRepository;
     }
 
+    /**
+     * Retrieves a comment by its unique identifier.
+     *
+     * @param id The unique identifier of the comment
+     * @return Comment with author details
+     * @throws ResourceNotFoundException If comment doesn't exist
+     * @throws NoSuchElementException On retrieval failure
+     */
     public CommentResponseDTO getCommentById(String id) {
         try {
             return commentRepository
@@ -60,6 +73,12 @@ public class CommentService {
         }
     }
 
+    /**
+     * Retrieves all comments in the system.
+     *
+     * @return List of all comments with author details
+     * @throws DatabaseOperationException On retrieval failure
+     */
     public List<CommentResponseDTO> getAllComments() {
         try {
             return commentRepository
@@ -77,6 +96,16 @@ public class CommentService {
         }
     }
 
+    /**
+     * Creates a new comment on an article.
+     *
+     * @param createCommentDTO Comment data to create
+     * @param articleId The article to comment on
+     * @param authorEmail Email of the comment author
+     * @return Created comment with generated ID
+     * @throws ResourceNotFoundException If article or author doesn't exist
+     * @throws DatabaseOperationException On creation failure
+     */
     public CommentResponseDTO createComment(
         CommentCreateRequestDTO createCommentDTO,
         String articleId,
@@ -117,6 +146,13 @@ public class CommentService {
         }
     }
 
+    /**
+     * Deletes a comment by ID.
+     *
+     * @param id The unique identifier of the comment to delete
+     * @throws ResourceNotFoundException If comment doesn't exist
+     * @throws DatabaseOperationException On deletion failure
+     */
     public void deleteComment(String id) {
         try {
             commentRepository
@@ -140,6 +176,14 @@ public class CommentService {
         }
     }
 
+    /**
+     * Maps database comment to response DTO.
+     * Enriches with author data.
+     *
+     * @param comment Database comment entity
+     * @return Comment response DTO with author details
+     * @throws BusinessLogicException On mapping failure
+     */
     private CommentResponseDTO CommentResponseDTO(DBComment comment) {
         try {
             CommentResponseDTO commentDTO = modelMapper.map(
@@ -171,6 +215,13 @@ public class CommentService {
         }
     }
 
+    /**
+     * Retrieves all comments for a specific article.
+     *
+     * @param articleId The unique identifier of the article
+     * @return List of comments for the specified article
+     * @throws DatabaseOperationException On retrieval failure
+     */
     public List<CommentResponseDTO> getCommentsByArticleId(String articleId) {
         try {
             return commentRepository

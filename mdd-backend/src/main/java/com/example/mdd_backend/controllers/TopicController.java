@@ -3,6 +3,7 @@ package com.example.mdd_backend.controllers;
 import com.example.mdd_backend.dtos.ArticleResponseDTO;
 import com.example.mdd_backend.dtos.TopicResponseDTO;
 import com.example.mdd_backend.services.TopicService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/topics")
+@Tag(name = "Topics", description = "Topic management operations")
 public class TopicController {
 
     private final TopicService topicService;

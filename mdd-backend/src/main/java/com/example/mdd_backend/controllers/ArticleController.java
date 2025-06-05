@@ -3,10 +3,9 @@ package com.example.mdd_backend.controllers;
 import com.example.mdd_backend.dtos.ArticleCreateRequestDTO;
 import com.example.mdd_backend.dtos.ArticleResponseDTO;
 import com.example.mdd_backend.services.ArticleService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -14,11 +13,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/articles")
+@Tag(name = "Articles", description = "Article management operations")
 public class ArticleController {
-
-    private final Logger logger = LoggerFactory.getLogger(
-        ArticleController.class
-    );
 
     private final ArticleService articleService;
 

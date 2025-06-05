@@ -14,6 +14,11 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for JWT token generation and management.
+ *
+ * Generates JWT tokens with 24-hour expiration for authentication.
+ */
 @Service
 public class JWTService {
 
@@ -27,9 +32,14 @@ public class JWTService {
         this.jwtEncoder = jwtEncoder;
     }
 
-    // While authentication
+    /**
+     * Generates JWT token from authenticated user.
+     *
+     * @param authentication Spring Security authentication object
+     * @return JWT token with 24-hour validity
+     * @throws AuthenticationException On token generation failure
+     */
     public AuthResponseDTO getToken(Authentication authentication) {
-        // authentication.getName() return the email of the user
         try {
             return generateToken(authentication.getName());
         } catch (Exception e) {
@@ -42,7 +52,13 @@ public class JWTService {
         }
     }
 
-    // while registration
+    /**
+     * Generates JWT token from user identifier (for registration).
+     *
+     * @param userIdentifier User email or username
+     * @return JWT token with 24-hour validity
+     * @throws AuthenticationException On token generation failure
+     */
     public AuthResponseDTO getTokenFromUserIdentifier(String userIdentifier) {
         try {
             return generateToken(userIdentifier);

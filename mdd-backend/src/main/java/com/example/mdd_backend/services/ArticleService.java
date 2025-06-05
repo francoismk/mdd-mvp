@@ -14,6 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for managing articles.
+ *
+ * Handles article creation, retrieval, deletion and sorting operations.
+ */
 @Service
 public class ArticleService {
 
@@ -44,6 +49,15 @@ public class ArticleService {
         this.sortStrategies = sortStrategies;
     }
 
+    /**
+     * Retrieves an article by its unique identifier.
+     * Includes author, topic and comments details.
+     *
+     * @param articleId The unique identifier of the article
+     * @return Complete article with metadata
+     * @throws ResourceNotFoundException If article doesn't exist
+     * @throws BusinessLogicException On system error
+     */
     public ArticleResponseDTO getArticleById(String articleId) {
         try {
             DBArticle dbArticle = articleRepository
@@ -62,6 +76,13 @@ public class ArticleService {
         }
     }
 
+    /**
+     * Retrieves all articles sorted by specified criteria.
+     *
+     * @param sortKey Sort criteria (date, title, etc.)
+     * @return List of articles sorted by specified key
+     * @throws BusinessLogicException If sort type unsupported or system error
+     */
     public List<ArticleResponseDTO> getArticlesSorted(String sortKey) {
         try {
             SortType sortType = SortType.fromString(sortKey);
@@ -93,6 +114,15 @@ public class ArticleService {
         }
     }
 
+    /**
+     * Creates a new article.
+     *
+     * @param articleDTO Article data to create
+     * @param authorEmail Email of the article author
+     * @return Created article with generated ID
+     * @throws ResourceNotFoundException If author doesn't exist
+     * @throws BusinessLogicException On creation failure
+     */
     public ArticleResponseDTO createArticle(
         ArticleCreateRequestDTO articleDTO,
         String authorEmail
@@ -120,6 +150,13 @@ public class ArticleService {
         }
     }
 
+    /**
+     * Deletes an article by ID.
+     *
+     * @param articleId The unique identifier of the article to delete
+     * @throws ResourceNotFoundException If article doesn't exist
+     * @throws BusinessLogicException On deletion failure
+     */
     public void deleteArticle(String articleId) {
         try {
             articleRepository
@@ -143,6 +180,14 @@ public class ArticleService {
         }
     }
 
+    /**
+     * Maps database article to response DTO.
+     * Enriches with author, topic and comments data.
+     *
+     * @param article Database article entity
+     * @return Complete article response DTO
+     * @throws BusinessLogicException On mapping failure
+     */
     private ArticleResponseDTO ArticleResponseDTO(DBArticle article) {
         try {
             ArticleResponseDTO articleDTO = modelMapper.map(
