@@ -1,7 +1,7 @@
 package com.example.mdd_backend.controllers;
 
 import com.example.mdd_backend.dtos.CreateTopicDTO;
-import com.example.mdd_backend.dtos.GetTopicDTO;
+import com.example.mdd_backend.dtos.TopicResponseDTO;
 import com.example.mdd_backend.services.TopicService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -26,20 +26,22 @@ public class TopicController {
     }
 
     @PostMapping
-    public ResponseEntity<GetTopicDTO> createTheme(
+    public ResponseEntity<TopicResponseDTO> createTheme(
         @Valid @RequestBody CreateTopicDTO topicDTO
     ) {
         if (topicDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        GetTopicDTO createdTheme = topicService.createTopic(topicDTO);
+        TopicResponseDTO createdTheme = topicService.createTopic(topicDTO);
         return new ResponseEntity<>(createdTheme, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetTopicDTO> getThemeById(@PathVariable String id) {
-        GetTopicDTO theme = topicService.getTopicById(id);
+    public ResponseEntity<TopicResponseDTO> getThemeById(
+        @PathVariable String id
+    ) {
+        TopicResponseDTO theme = topicService.getTopicById(id);
 
         if (theme == null) {
             return ResponseEntity.notFound().build();
@@ -48,8 +50,8 @@ public class TopicController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetTopicDTO>> getAllThemes() {
-        List<GetTopicDTO> themes = topicService.getAllTopics();
+    public ResponseEntity<List<TopicResponseDTO>> getAllThemes() {
+        List<TopicResponseDTO> themes = topicService.getAllTopics();
 
         if (themes == null) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
