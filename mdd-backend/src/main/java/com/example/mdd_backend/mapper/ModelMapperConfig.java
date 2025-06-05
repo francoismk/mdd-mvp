@@ -1,6 +1,6 @@
 package com.example.mdd_backend.mapper;
 
-import com.example.mdd_backend.dtos.CreateArticleDTO;
+import com.example.mdd_backend.dtos.ArticleCreateRequestDTO;
 import com.example.mdd_backend.models.DBArticle;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +13,10 @@ public class ModelMapperConfig {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
 
-        modelMapper.typeMap(CreateArticleDTO.class, DBArticle.class)
-                .addMappings(mapping -> mapping.skip(DBArticle::setId));
+        modelMapper
+            .typeMap(ArticleCreateRequestDTO.class, DBArticle.class)
+            .addMappings(mapping -> mapping.skip(DBArticle::setId));
 
-    return modelMapper;
-}}
+        return modelMapper;
+    }
+}

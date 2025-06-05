@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateArticleDTO {
+public class ArticleCreateRequestDTO {
 
     @NotNull(message = "Title is required")
     private String title;

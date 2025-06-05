@@ -1,9 +1,10 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.CreateArticleDTO;
-import com.example.mdd_backend.dtos.GetArticleDTO;
+import com.example.mdd_backend.dtos.ArticleCreateRequestDTO;
+import com.example.mdd_backend.dtos.ArticleResponseDTO;
 import com.example.mdd_backend.services.ArticleService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -11,13 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/articles")
 public class ArticleController {
 
-    private final Logger logger = LoggerFactory.getLogger(ArticleController.class);
+    private final Logger logger = LoggerFactory.getLogger(
+        ArticleController.class
+    );
 
     private final ArticleService articleService;
 
@@ -26,19 +27,29 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ResponseEntity<GetArticleDTO> createArticle(@Valid @RequestBody CreateArticleDTO articleDTO, Authentication authentication) {
+    public ResponseEntity<ArticleResponseDTO> createArticle(
+        @Valid @RequestBody ArticleCreateRequestDTO articleDTO,
+        Authentication authentication
+    ) {
         if (articleDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         String authorEmail = authentication.getName();
 
-        GetArticleDTO createdArticle = articleService.createArticle(articleDTO, authorEmail);
+        ArticleResponseDTO createdArticle = articleService.createArticle(
+            articleDTO,
+            authorEmail
+        );
         return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<GetArticleDTO>> getAllArticles(@RequestParam(name = "sort", defaultValue = "date_asc") String sortOrder) {
-        List<GetArticleDTO> articles = articleService.getArticlesSorted(sortOrder);
+    public ResponseEntity<List<ArticleResponseDTO>> getAllArticles(
+        @RequestParam(name = "sort", defaultValue = "date_asc") String sortOrder
+    ) {
+        List<ArticleResponseDTO> articles = articleService.getArticlesSorted(
+            sortOrder
+        );
 
         if (articles == null || articles.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -47,8 +58,10 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetArticleDTO> getArticleById(@PathVariable String id) {
-        GetArticleDTO article = articleService.getArticleById(id);
+    public ResponseEntity<ArticleResponseDTO> getArticleById(
+        @PathVariable String id
+    ) {
+        ArticleResponseDTO article = articleService.getArticleById(id);
 
         if (article == null) {
             return ResponseEntity.notFound().build();

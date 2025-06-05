@@ -44,7 +44,7 @@ public class ArticleService {
         this.sortStrategies = sortStrategies;
     }
 
-    public GetArticleDTO getArticleById(String articleId) {
+    public ArticleResponseDTO getArticleById(String articleId) {
         try {
             DBArticle dbArticle = articleRepository
                 .findById(articleId)
@@ -53,7 +53,7 @@ public class ArticleService {
                         "Article not found with ID : " + articleId
                     )
                 );
-            return getArticleDTO(dbArticle);
+            return ArticleResponseDTO(dbArticle);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -62,7 +62,7 @@ public class ArticleService {
         }
     }
 
-    public List<GetArticleDTO> getArticlesSorted(String sortKey) {
+    public List<ArticleResponseDTO> getArticlesSorted(String sortKey) {
         try {
             SortType sortType = SortType.fromString(sortKey);
 
@@ -80,7 +80,7 @@ public class ArticleService {
                 strategy.getSort()
             );
 
-            return articles.stream().map(this::getArticleDTO).toList();
+            return articles.stream().map(this::ArticleResponseDTO).toList();
         } catch (BusinessLogicException e) {
             throw e;
         } catch (Exception e) {
@@ -93,8 +93,8 @@ public class ArticleService {
         }
     }
 
-    public GetArticleDTO createArticle(
-        CreateArticleDTO articleDTO,
+    public ArticleResponseDTO createArticle(
+        ArticleCreateRequestDTO articleDTO,
         String authorEmail
     ) {
         try {
@@ -106,7 +106,7 @@ public class ArticleService {
 
             DBArticle savedArticle = articleRepository.save(article);
 
-            return getArticleDTO(savedArticle);
+            return ArticleResponseDTO(savedArticle);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
@@ -143,11 +143,11 @@ public class ArticleService {
         }
     }
 
-    private GetArticleDTO getArticleDTO(DBArticle article) {
+    private ArticleResponseDTO ArticleResponseDTO(DBArticle article) {
         try {
-            GetArticleDTO articleDTO = modelMapper.map(
+            ArticleResponseDTO articleDTO = modelMapper.map(
                 article,
-                GetArticleDTO.class
+                ArticleResponseDTO.class
             );
 
             GetUserDTO author = userService.getUserById(article.getAuthorId());

@@ -1,6 +1,6 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.TopicCreateRequestDTO;
+import com.example.mdd_backend.dtos.ArticleResponseDTO;
 import com.example.mdd_backend.dtos.TopicResponseDTO;
 import com.example.mdd_backend.services.TopicService;
 import jakarta.validation.Valid;
@@ -27,7 +27,7 @@ public class TopicController {
 
     @PostMapping
     public ResponseEntity<TopicResponseDTO> createTheme(
-        @Valid @RequestBody TopicCreateRequestDTO topicDTO
+        @Valid @RequestBody ArticleResponseDTO topicDTO
     ) {
         if (topicDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

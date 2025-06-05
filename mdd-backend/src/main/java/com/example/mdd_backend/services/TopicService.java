@@ -1,6 +1,6 @@
 package com.example.mdd_backend.services;
 
-import com.example.mdd_backend.dtos.TopicCreateRequestDTO;
+import com.example.mdd_backend.dtos.ArticleResponseDTO;
 import com.example.mdd_backend.dtos.TopicResponseDTO;
 import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
 import com.example.mdd_backend.errors.exceptions.ResourceNotFoundException;
@@ -32,7 +32,7 @@ public class TopicService {
         this.modelMapper = modelMapper;
     }
 
-    public TopicResponseDTO createTopic(TopicCreateRequestDTO topicDTO) {
+    public TopicResponseDTO createTopic(ArticleResponseDTO topicDTO) {
         try {
             DBTopic topic = modelMapper.map(topicDTO, DBTopic.class);
             DBTopic savedTopic = topicRepository.save(topic);

@@ -7,7 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GetArticleDTO {
+public class ArticleResponseDTO {
 
     private String id;
     private String title;
