@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateTopicDTO {
+public class TopicCreateRequestDTO {
 
     @NotNull(message = "Name is required")
     private String name;
