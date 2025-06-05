@@ -9,7 +9,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 
 @Getter
 @Setter
-public class LoginUserDTO {
+public class LoginRequestDTO {
 
     @NotBlank(message = "Email or usernale is required")
     private String usernameOrEmail;

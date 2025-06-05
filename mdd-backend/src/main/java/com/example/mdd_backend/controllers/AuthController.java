@@ -1,7 +1,7 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.JWTResponseDTO;
-import com.example.mdd_backend.dtos.LoginUserDTO;
+import com.example.mdd_backend.dtos.AuthResponseDTO;
+import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.services.AuthService;
 import jakarta.validation.Valid;
@@ -20,19 +20,19 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<JWTResponseDTO> createUser(
+    public ResponseEntity<AuthResponseDTO> createUser(
         @Valid @RequestBody UserCreateRequestDTO userDTO
     ) {
-        JWTResponseDTO token = authService.registerAndGenerateToken(userDTO);
+        AuthResponseDTO token = authService.registerAndGenerateToken(userDTO);
         return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<JWTResponseDTO> loginUser(
-        @Valid @RequestBody LoginUserDTO loginUserDTO
+    public ResponseEntity<AuthResponseDTO> loginUser(
+        @Valid @RequestBody LoginRequestDTO LoginRequestDTO
     ) {
-        JWTResponseDTO token = authService.authenticateAndGenerateToken(
-            loginUserDTO
+        AuthResponseDTO token = authService.authenticateAndGenerateToken(
+            LoginRequestDTO
         );
 
         return new ResponseEntity<>(token, HttpStatus.OK);

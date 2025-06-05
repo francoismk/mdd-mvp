@@ -1,7 +1,7 @@
 package com.example.mdd_backend.services;
 
-import com.example.mdd_backend.dtos.JWTResponseDTO;
-import com.example.mdd_backend.dtos.LoginUserDTO;
+import com.example.mdd_backend.dtos.AuthResponseDTO;
+import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.errors.exceptions.AuthenticationException;
 import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
@@ -34,14 +34,14 @@ public class AuthService {
         this.userService = userService;
     }
 
-    public JWTResponseDTO authenticateAndGenerateToken(
-        LoginUserDTO loginUserDTO
+    public AuthResponseDTO authenticateAndGenerateToken(
+        LoginRequestDTO LoginRequestDTO
     ) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                    loginUserDTO.getUsernameOrEmail(),
-                    loginUserDTO.getPassword()
+                    LoginRequestDTO.getUsernameOrEmail(),
+                    LoginRequestDTO.getPassword()
                 )
             );
 
@@ -49,13 +49,13 @@ public class AuthService {
         } catch (Exception e) {
             logger.warn(
                 "Authentication failed for user: {}",
-                loginUserDTO.getUsernameOrEmail()
+                LoginRequestDTO.getUsernameOrEmail()
             );
             throw new AuthenticationException("Invalid credentials");
         }
     }
 
-    public JWTResponseDTO registerAndGenerateToken(
+    public AuthResponseDTO registerAndGenerateToken(
         UserCreateRequestDTO userDTO
     ) {
         try {
