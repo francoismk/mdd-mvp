@@ -15,5 +15,5 @@ public class ArticleResponseDTO {
     private Date createdAt;
     private GetUserDTO author;
     private TopicResponseDTO topic;
-    private List<GetCommentDTO> comments;
+    private List<CommentResponseDTO> comments;
 }

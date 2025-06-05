@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateCommentDTO {
+public class CommentCreateRequestDTO {
 
     @NotNull(message = "Content is required")
     private String content;

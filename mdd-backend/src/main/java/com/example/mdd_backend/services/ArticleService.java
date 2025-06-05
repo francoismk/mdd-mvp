@@ -158,7 +158,7 @@ public class ArticleService {
             );
             articleDTO.setTopic(topic);
 
-            List<GetCommentDTO> comments =
+            List<CommentResponseDTO> comments =
                 commentService.getCommentsByArticleId(article.getId());
             articleDTO.setComments(comments);
 
