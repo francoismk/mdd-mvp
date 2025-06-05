@@ -7,7 +7,6 @@ import com.example.mdd_backend.errors.exceptions.ResourceNotFoundException;
 import com.example.mdd_backend.models.DBTopic;
 import com.example.mdd_backend.repositories.TopicRepository;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;

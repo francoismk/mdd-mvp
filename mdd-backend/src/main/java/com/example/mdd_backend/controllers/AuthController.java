@@ -4,6 +4,7 @@ import com.example.mdd_backend.dtos.AuthResponseDTO;
 import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.services.AuthService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
+@Tag(
+    name = "Authentication",
+    description = "Authentication management operations"
+)
 public class AuthController {
 
     private final AuthService authService;

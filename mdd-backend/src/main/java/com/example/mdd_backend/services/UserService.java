@@ -14,7 +14,6 @@ import com.example.mdd_backend.repositories.TopicRepository;
 import com.example.mdd_backend.repositories.UserRepository;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
@@ -25,7 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * The type User service.
+ * Service for managing users and their subscriptions.
+ *
+ * Handles user creation, updates, topic subscriptions and retrieval operations.
  */
 @Service
 public class UserService {
@@ -51,6 +52,14 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
+    /**
+     * Creates a new user account.
+     *
+     * @param userDTO User registration data
+     * @return Created user with generated ID
+     * @throws DuplicateResourceException If email or username already exists
+     * @throws RuntimeException On creation failure
+     */
     public UserResponseDTO createUser(UserCreateRequestDTO userDTO) {
         try {
             DBUser user = modelMapper.map(userDTO, DBUser.class);
@@ -72,6 +81,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves all users in the system.
+     *
+     * @return List of all users with their subscriptions
+     * @throws DatabaseOperationException On retrieval failure
+     */
     public List<UserResponseDTO> getAllUsers() {
         try {
             List<DBUser> users = userRepository.findAll();
@@ -87,6 +102,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves a user by their unique identifier.
+     *
+     * @param id The unique identifier of the user
+     * @return User with subscription details
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws DatabaseOperationException On retrieval failure
+     */
     public UserResponseDTO getUserById(String id) {
         try {
             DBUser user = userRepository
@@ -111,6 +134,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Retrieves a user by their email address.
+     *
+     * @param email The email address of the user
+     * @return User with subscription details
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws DatabaseOperationException On retrieval failure
+     */
     public UserResponseDTO getUserByEmail(String email) {
         try {
             DBUser user = userRepository
@@ -135,55 +166,15 @@ public class UserService {
         }
     }
 
-    private UserResponseDTO buildUserDto(DBUser user) {
-        try {
-            UserResponseDTO userDTO = modelMapper.map(
-                user,
-                UserResponseDTO.class
-            );
-
-            if (
-                user.getSubscribedTopicIds() != null &&
-                !user.getSubscribedTopicIds().isEmpty()
-            ) {
-                List<TopicResponseDTO> themeDTOs = user
-                    .getSubscribedTopicIds()
-                    .stream()
-                    .map(themeId -> {
-                        try {
-                            Optional<DBTopic> themeOptional =
-                                themeRepository.findById(themeId);
-                            return themeOptional
-                                .map(theme ->
-                                    modelMapper.map(
-                                        theme,
-                                        TopicResponseDTO.class
-                                    )
-                                )
-                                .orElse(null);
-                        } catch (Exception e) {
-                            logger.warn(
-                                "Error retrieving topic with ID {}: {}",
-                                themeId,
-                                e.getMessage()
-                            );
-                            return null;
-                        }
-                    })
-                    .filter(themeDTO -> themeDTO != null)
-                    .collect(Collectors.toList());
-
-                userDTO.setSubscriptions(themeDTOs);
-            } else {
-                userDTO.setSubscriptions(new ArrayList<>());
-            }
-            return userDTO;
-        } catch (Exception e) {
-            logger.error("Error building user DTO: {}", e.getMessage(), e);
-            throw new BusinessLogicException("Failed to map user data");
-        }
-    }
-
+    /**
+     * Subscribes a user to a topic.
+     *
+     * @param themeId The unique identifier of the topic
+     * @param userEmail The email of the user to subscribe
+     * @return Updated user with new subscription
+     * @throws ResourceNotFoundException If user or topic doesn't exist
+     * @throws BusinessLogicException On subscription failure
+     */
     public UserResponseDTO subscribeUserToTheme(
         String themeId,
         String userEmail
@@ -230,6 +221,15 @@ public class UserService {
         }
     }
 
+    /**
+     * Unsubscribes a user from a topic.
+     *
+     * @param themeId The unique identifier of the topic
+     * @param userEmail The email of the user to unsubscribe
+     * @return Updated user without the subscription
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws BusinessLogicException On unsubscription failure
+     */
     public UserResponseDTO unsuscribeUserToTheme(
         String themeId,
         String userEmail
@@ -265,6 +265,13 @@ public class UserService {
         }
     }
 
+    /**
+     * Deletes a user by ID.
+     *
+     * @param userId The unique identifier of the user to delete
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws DatabaseOperationException On deletion failure
+     */
     public void deleteUser(String userId) {
         try {
             userRepository
@@ -289,6 +296,18 @@ public class UserService {
         }
     }
 
+    /**
+     * Updates user information.
+     *
+     * Validates email uniqueness before updating.
+     *
+     * @param userId The unique identifier of the user to update
+     * @param updateUserDTO Updated user data
+     * @return Updated user information
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws DuplicateResourceException If new email already exists
+     * @throws DatabaseOperationException On update failure
+     */
     public UserResponseDTO updateUser(
         String userId,
         UserUpdateRequestDTO updateUserDTO
@@ -335,6 +354,62 @@ public class UserService {
         } catch (Exception e) {
             logger.error("Error while update user: {}", e.getMessage(), e);
             throw new DatabaseOperationException("Failed to update user");
+        }
+    }
+
+    /**
+     * Builds user response DTO with subscription details.
+     *
+     * @param user Database user entity
+     * @return User response DTO with enriched subscription data
+     * @throws BusinessLogicException On mapping failure
+     */
+    private UserResponseDTO buildUserDto(DBUser user) {
+        try {
+            UserResponseDTO userDTO = modelMapper.map(
+                user,
+                UserResponseDTO.class
+            );
+
+            if (
+                user.getSubscribedTopicIds() != null &&
+                !user.getSubscribedTopicIds().isEmpty()
+            ) {
+                List<TopicResponseDTO> themeDTOs = user
+                    .getSubscribedTopicIds()
+                    .stream()
+                    .map(themeId -> {
+                        try {
+                            Optional<DBTopic> themeOptional =
+                                themeRepository.findById(themeId);
+                            return themeOptional
+                                .map(theme ->
+                                    modelMapper.map(
+                                        theme,
+                                        TopicResponseDTO.class
+                                    )
+                                )
+                                .orElse(null);
+                        } catch (Exception e) {
+                            logger.warn(
+                                "Error retrieving topic with ID {}: {}",
+                                themeId,
+                                e.getMessage()
+                            );
+                            return null;
+                        }
+                    })
+                    .filter(themeDTO -> themeDTO != null)
+                    .collect(Collectors.toList());
+
+                userDTO.setSubscriptions(themeDTOs);
+            } else {
+                userDTO.setSubscriptions(new ArrayList<>());
+            }
+            return userDTO;
+        } catch (Exception e) {
+            logger.error("Error building user DTO: {}", e.getMessage(), e);
+            throw new BusinessLogicException("Failed to map user data");
         }
     }
 }

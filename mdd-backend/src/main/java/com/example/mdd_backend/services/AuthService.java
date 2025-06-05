@@ -13,6 +13,11 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service for user authentication and registration.
+ *
+ * Handles login, registration and JWT token generation.
+ */
 @Service
 public class AuthService {
 
@@ -34,6 +39,15 @@ public class AuthService {
         this.userService = userService;
     }
 
+    /**
+     * Authenticates user and generates JWT token.
+     *
+     * Supports login with either username or email.
+     *
+     * @param loginRequestDTO User credentials (username/email + password)
+     * @return JWT token for authenticated user
+     * @throws AuthenticationException If credentials are invalid
+     */
     public AuthResponseDTO authenticateAndGenerateToken(
         LoginRequestDTO LoginRequestDTO
     ) {
@@ -55,6 +69,16 @@ public class AuthService {
         }
     }
 
+    /**
+     * Registers new user and generates JWT token.
+     *
+     * Creates user account and automatically logs them in.
+     *
+     * @param userDTO New user registration data
+     * @return JWT token for newly registered user
+     * @throws DuplicateResourceException If email already exists
+     * @throws AuthenticationException On registration failure
+     */
     public AuthResponseDTO registerAndGenerateToken(
         UserCreateRequestDTO userDTO
     ) {
