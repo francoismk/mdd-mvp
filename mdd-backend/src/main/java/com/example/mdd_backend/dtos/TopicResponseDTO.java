@@ -5,8 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class GetTopicDTO {
-    
+public class TopicResponseDTO {
+
     private String id;
     private String name;
 }

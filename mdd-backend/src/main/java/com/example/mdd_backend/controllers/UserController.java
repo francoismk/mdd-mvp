@@ -1,13 +1,12 @@
 package com.example.mdd_backend.controllers;
 
-import com.example.mdd_backend.dtos.CreateUserDTO;
-import com.example.mdd_backend.dtos.GetUserDTO;
-import com.example.mdd_backend.dtos.UpdateUserDTO;
+import com.example.mdd_backend.dtos.UserCreateRequestDTO;
+import com.example.mdd_backend.dtos.UserResponseDTO;
+import com.example.mdd_backend.dtos.UserUpdateRequestDTO;
 import com.example.mdd_backend.services.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.util.List;
-
 import org.slf4j.ILoggerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,15 +20,19 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
-    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        UserController.class
+    );
 
     public UserController(UserService userService) {
         this.userService = userService;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetUserDTO> getUserById(@PathVariable String id) {
-        GetUserDTO user = userService.getUserById(id);
+    public ResponseEntity<UserResponseDTO> getUserById(
+        @PathVariable String id
+    ) {
+        UserResponseDTO user = userService.getUserById(id);
 
         if (user == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -38,16 +41,16 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GetUserDTO>> getUsers() {
-        List<GetUserDTO> users = userService.getAllUsers();
+    public ResponseEntity<List<UserResponseDTO>> getUsers() {
+        List<UserResponseDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity<GetUserDTO> createUser(
-            @Valid @RequestBody CreateUserDTO userDTO
+    public ResponseEntity<UserResponseDTO> createUser(
+        @Valid @RequestBody UserCreateRequestDTO userDTO
     ) {
-        GetUserDTO createdUser = userService.createUser(userDTO);
+        UserResponseDTO createdUser = userService.createUser(userDTO);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
@@ -59,23 +62,38 @@ public class UserController {
     }
 
     @PostMapping("/{themeId}/subscriptions")
-    public ResponseEntity<GetUserDTO> subscribeToTheme(@PathVariable String themeId, Authentication authentication, HttpServletRequest request) {
+    public ResponseEntity<UserResponseDTO> subscribeToTheme(
+        @PathVariable String themeId,
+        Authentication authentication,
+        HttpServletRequest request
+    ) {
         String userId = authentication.getName();
-        GetUserDTO user = userService.subscribeUserToTheme(themeId, userId);
+        UserResponseDTO user = userService.subscribeUserToTheme(
+            themeId,
+            userId
+        );
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{themeId}/unsubscriptions")
-    public ResponseEntity<GetUserDTO> unsubscribeToTheme(@PathVariable String themeId, Authentication authentication) {
+    public ResponseEntity<UserResponseDTO> unsubscribeToTheme(
+        @PathVariable String themeId,
+        Authentication authentication
+    ) {
         String userId = authentication.getName();
-        GetUserDTO user = userService.unsuscribeUserToTheme(themeId, userId);
+        UserResponseDTO user = userService.unsuscribeUserToTheme(
+            themeId,
+            userId
+        );
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<GetUserDTO> updateUser(@PathVariable String id, @RequestBody UpdateUserDTO updateUserDTO) {
-        GetUserDTO updatedUser = userService.updateUser(id, updateUserDTO);
+    public ResponseEntity<UserResponseDTO> updateUser(
+        @PathVariable String id,
+        @RequestBody UserUpdateRequestDTO updateUserDTO
+    ) {
+        UserResponseDTO updatedUser = userService.updateUser(id, updateUserDTO);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
-
 }

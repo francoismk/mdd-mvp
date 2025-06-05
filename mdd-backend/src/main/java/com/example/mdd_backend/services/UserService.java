@@ -1,9 +1,9 @@
 package com.example.mdd_backend.services;
 
-import com.example.mdd_backend.dtos.CreateUserDTO;
-import com.example.mdd_backend.dtos.GetTopicDTO;
-import com.example.mdd_backend.dtos.GetUserDTO;
-import com.example.mdd_backend.dtos.UpdateUserDTO;
+import com.example.mdd_backend.dtos.TopicResponseDTO;
+import com.example.mdd_backend.dtos.UserCreateRequestDTO;
+import com.example.mdd_backend.dtos.UserResponseDTO;
+import com.example.mdd_backend.dtos.UserUpdateRequestDTO;
 import com.example.mdd_backend.errors.exceptions.BusinessLogicException;
 import com.example.mdd_backend.errors.exceptions.DatabaseOperationException;
 import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
@@ -30,7 +30,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserService {
 
-    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+    private static final Logger logger = LoggerFactory.getLogger(
+        UserService.class
+    );
 
     private final UserRepository userRepository;
     private final TopicRepository themeRepository;
@@ -49,94 +51,127 @@ public class UserService {
         this.modelMapper = modelMapper;
     }
 
-    public GetUserDTO createUser(CreateUserDTO userDTO) {
+    public UserResponseDTO createUser(UserCreateRequestDTO userDTO) {
         try {
             DBUser user = modelMapper.map(userDTO, DBUser.class);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             DBUser savedUser = userRepository.save(user);
-            return modelMapper.map(savedUser, GetUserDTO.class);
+            return modelMapper.map(savedUser, UserResponseDTO.class);
         } catch (DuplicateKeyException e) {
-            logger.warn("User creation failed: Email or username already exists: {}", userDTO.getEmail());
-            throw new DuplicateResourceException("User with this email or username already exists");
+            logger.warn(
+                "User creation failed: Email or username already exists: {}",
+                userDTO.getEmail()
+            );
+            throw new DuplicateResourceException(
+                "User with this email or username already exists"
+            );
         } catch (Exception e) {
             logger.error("Error creating user: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to create user");
         }
-
     }
 
-    public List<GetUserDTO> getAllUsers() {
+    public List<UserResponseDTO> getAllUsers() {
         try {
             List<DBUser> users = userRepository.findAll();
             return users
-                    .stream()
-                    .map(user -> {
-                        return buildUserDto(user);
-                    })
-                    .collect(Collectors.toList());
+                .stream()
+                .map(user -> {
+                    return buildUserDto(user);
+                })
+                .collect(Collectors.toList());
         } catch (Exception e) {
             logger.error("Error retrieving all users: {}", e.getMessage(), e);
             throw new DatabaseOperationException("Failed to retrieve users");
         }
-
     }
 
-    public GetUserDTO getUserById(String id) {
+    public UserResponseDTO getUserById(String id) {
         try {
             DBUser user = userRepository
-                    .findById(id)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("user not found with ID : " + id)
-                    );
+                .findById(id)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "user not found with ID : " + id
+                    )
+                );
 
             return buildUserDto(user);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error retrieving user with ID {}: {}", id, e.getMessage(), e);
+            logger.error(
+                "Error retrieving user with ID {}: {}",
+                id,
+                e.getMessage(),
+                e
+            );
             throw new DatabaseOperationException("Failed to retrieve user");
         }
     }
 
-    public GetUserDTO getUserByEmail(String email) {
+    public UserResponseDTO getUserByEmail(String email) {
         try {
             DBUser user = userRepository
-                    .findByEmail(email)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("user not found with email : " + email)
-                    );
+                .findByEmail(email)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "user not found with email : " + email
+                    )
+                );
 
             return buildUserDto(user);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error retrieving user with email {}: {}", email, e.getMessage(), e);
+            logger.error(
+                "Error retrieving user with email {}: {}",
+                email,
+                e.getMessage(),
+                e
+            );
             throw new DatabaseOperationException("Failed to retrieve user");
         }
     }
 
-    private GetUserDTO buildUserDto(DBUser user) {
+    private UserResponseDTO buildUserDto(DBUser user) {
         try {
-            GetUserDTO userDTO = modelMapper.map(user, GetUserDTO.class);
+            UserResponseDTO userDTO = modelMapper.map(
+                user,
+                UserResponseDTO.class
+            );
 
-            if (user.getSubscribedTopicIds() != null && !user.getSubscribedTopicIds().isEmpty()) {
-                List<GetTopicDTO> themeDTOs = user
-                        .getSubscribedTopicIds()
-                        .stream()
-                        .map(themeId -> {
-                            try {
-                                Optional<DBTopic> themeOptional = themeRepository.findById(themeId);
-                                return themeOptional
-                                        .map(theme -> modelMapper.map(theme, GetTopicDTO.class))
-                                        .orElse(null);
-                            } catch (Exception e) {
-                                logger.warn("Error retrieving topic with ID {}: {}", themeId, e.getMessage());
-                                return null;
-                            }
-                        })
-                        .filter(themeDTO -> themeDTO != null)
-                        .collect(Collectors.toList());
+            if (
+                user.getSubscribedTopicIds() != null &&
+                !user.getSubscribedTopicIds().isEmpty()
+            ) {
+                List<TopicResponseDTO> themeDTOs = user
+                    .getSubscribedTopicIds()
+                    .stream()
+                    .map(themeId -> {
+                        try {
+                            Optional<DBTopic> themeOptional =
+                                themeRepository.findById(themeId);
+                            return themeOptional
+                                .map(theme ->
+                                    modelMapper.map(
+                                        theme,
+                                        TopicResponseDTO.class
+                                    )
+                                )
+                                .orElse(null);
+                        } catch (Exception e) {
+                            logger.warn(
+                                "Error retrieving topic with ID {}: {}",
+                                themeId,
+                                e.getMessage()
+                            );
+                            return null;
+                        }
+                    })
+                    .filter(themeDTO -> themeDTO != null)
+                    .collect(Collectors.toList());
 
                 userDTO.setSubscriptions(themeDTOs);
             } else {
@@ -149,20 +184,25 @@ public class UserService {
         }
     }
 
-    public GetUserDTO subscribeUserToTheme(String themeId, String userEmail) {
+    public UserResponseDTO subscribeUserToTheme(
+        String themeId,
+        String userEmail
+    ) {
         try {
             DBUser user = userRepository
-                    .findByEmail(userEmail).orElseThrow(
-                            () -> new ResourceNotFoundException(
-                                    "User not found with email : " + userEmail
-                            ));
+                .findByEmail(userEmail)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "User not found with email : " + userEmail
+                    )
+                );
             DBTopic theme = themeRepository
-                    .findById(themeId)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "theme not found with ID : " + themeId
-                            )
-                    );
+                .findById(themeId)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "theme not found with ID : " + themeId
+                    )
+                );
             List<String> themeExisting = user.getSubscribedTopicIds();
 
             if (themeExisting == null) {
@@ -179,18 +219,29 @@ public class UserService {
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error subscribing user to theme: {}", e.getMessage(), e);
-            throw new BusinessLogicException("Failed to subscribe user to theme");
+            logger.error(
+                "Error subscribing user to theme: {}",
+                e.getMessage(),
+                e
+            );
+            throw new BusinessLogicException(
+                "Failed to subscribe user to theme"
+            );
         }
     }
 
-    public GetUserDTO unsuscribeUserToTheme(String themeId, String userEmail) {
+    public UserResponseDTO unsuscribeUserToTheme(
+        String themeId,
+        String userEmail
+    ) {
         try {
             DBUser user = userRepository
-                    .findByEmail(userEmail)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("User not found with ID : " + userEmail)
-                    );
+                .findByEmail(userEmail)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "User not found with ID : " + userEmail
+                    )
+                );
 
             List<String> subscriptions = user.getSubscribedTopicIds();
             if (subscriptions != null) {
@@ -203,36 +254,66 @@ public class UserService {
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error unsubscribing user from theme: {}", e.getMessage(), e);
-            throw new BusinessLogicException("Failed to unsubscribe user from theme");
+            logger.error(
+                "Error unsubscribing user from theme: {}",
+                e.getMessage(),
+                e
+            );
+            throw new BusinessLogicException(
+                "Failed to unsubscribe user from theme"
+            );
         }
     }
 
     public void deleteUser(String userId) {
         try {
             userRepository
-                    .findById(userId)
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException("User not found with ID : " + userId)
-                    );
+                .findById(userId)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "User not found with ID : " + userId
+                    )
+                );
 
             userRepository.deleteById(userId);
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {
-            logger.error("Error deleting user with ID {}: {}", userId, e.getMessage(), e);
+            logger.error(
+                "Error deleting user with ID {}: {}",
+                userId,
+                e.getMessage(),
+                e
+            );
             throw new DatabaseOperationException("Failed to delete user");
         }
     }
 
-    public GetUserDTO updateUser(String userId, UpdateUserDTO updateUserDTO) {
+    public UserResponseDTO updateUser(
+        String userId,
+        UserUpdateRequestDTO updateUserDTO
+    ) {
         try {
-            DBUser user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+            DBUser user = userRepository
+                .findById(userId)
+                .orElseThrow(() ->
+                    new ResourceNotFoundException(
+                        "User not found with ID: " + userId
+                    )
+                );
 
-            if (updateUserDTO.getEmail() != null && !updateUserDTO.getEmail().equals(user.getEmail())) {
-                if (userRepository.findByEmail(updateUserDTO.getEmail()).isPresent()) {
-                    throw new DuplicateResourceException("Email already exists");
+            if (
+                updateUserDTO.getEmail() != null &&
+                !updateUserDTO.getEmail().equals(user.getEmail())
+            ) {
+                if (
+                    userRepository
+                        .findByEmail(updateUserDTO.getEmail())
+                        .isPresent()
+                ) {
+                    throw new DuplicateResourceException(
+                        "Email already exists"
+                    );
                 }
                 user.setEmail(updateUserDTO.getEmail());
             }
@@ -242,7 +323,9 @@ public class UserService {
             }
 
             if (updateUserDTO.getPassword() != null) {
-                user.setPassword(passwordEncoder.encode(updateUserDTO.getPassword()));
+                user.setPassword(
+                    passwordEncoder.encode(updateUserDTO.getPassword())
+                );
             }
 
             DBUser savedUser = userRepository.save(user);

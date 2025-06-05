@@ -6,8 +6,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateTopicDTO {
+public class CommentCreateRequestDTO {
 
-    @NotNull(message = "Name is required")
-    private String name;
+    @NotNull(message = "Content is required")
+    private String content;
 }
