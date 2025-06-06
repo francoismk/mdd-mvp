@@ -9,6 +9,13 @@ import { toSignal } from "@angular/core/rxjs-interop";
     <div>
       <h1>Articles</h1>
       <p>Check console for data</p>
+      <div>
+        @for (article of articles(); track article.id) {
+          <h2>{{ article.title }}</h2>
+          <p>{{ article.content }}</p>
+          <p>{{ article.author.username }}</p>
+        }
+      </div>
     </div>
   `,
 })
