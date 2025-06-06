@@ -54,7 +54,7 @@ public class ArticleService {
      * Includes author, topic and comments details.
      *
      * @param articleId The unique identifier of the article
-     * @return Complete article with metadata
+     * @return {@link ArticleResponseDTO} with complete article data
      * @throws ResourceNotFoundException If article doesn't exist
      * @throws BusinessLogicException On system error
      */
@@ -119,7 +119,7 @@ public class ArticleService {
      *
      * @param articleDTO Article data to create
      * @param authorEmail Email of the article author
-     * @return Created article with generated ID
+     * @return {@link ArticleResponseDTO} with created article data
      * @throws ResourceNotFoundException If author doesn't exist
      * @throws BusinessLogicException On creation failure
      */
