@@ -1,6 +1,6 @@
 import { Topic, User } from ".";
 
-export interface ArticleInterface {
+export interface Article {
   id: string;
   title: string;
   content: string;
