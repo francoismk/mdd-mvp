@@ -2,22 +2,35 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { Article } from "../../../core/models";
+import {CreateArticle} from '../../../core/models/create-article.interface';
 
 // Récupération des articles via httpClient ici ?
 @Injectable({ providedIn: "root" })
 export class ArticleService {
   private http = inject(HttpClient);
-  private baseUrl = "http://localhost:8080/api/articles?sort=date_asc";
+  private baseUrl = "http://localhost:8080/api";
+  private token =
+    "insert_your_token_here";
+
+  private headers = new HttpHeaders({
+    Authorization: `Bearer ${this.token}`,
+    "Content-Type": "application/json",
+  });
 
   getArticles(): Observable<Article[]> {
-    const token =
-      "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJzZWxmIiwic3ViIjoiamFuZS5zbWl0aEBtYWlsLmNvbSIsImV4cCI6MTc0OTMwMzkxNiwiaWF0IjoxNzQ5MjE3NTE2fQ.7jDhT5NOOvigrKPD1gpiOglm_xK1ExCXBXFFs4AUTzY";
+    const url = `${this.baseUrl}/articles?sort=date_asc`;
+    return this.http.get<Article[]>(url, { headers: this.headers });
+  }
 
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
+  getArticlesById(id: string): Observable<Article> {
+    return this.http.get<Article>(this.baseUrl, { headers: this.headers });
+  }
+
+  createArticle(article: CreateArticle): Observable<CreateArticle> {
+    const url = `${this.baseUrl}/articles`;
+    console.log("========= from front======== ", article);
+    return this.http.post<CreateArticle>(url, article, {
+      headers: this.headers,
     });
-
-    return this.http.get<Article[]>(this.baseUrl, { headers });
   }
 }
