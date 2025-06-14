@@ -5,6 +5,8 @@ import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.errors.exceptions.AuthenticationException;
 import com.example.mdd_backend.errors.exceptions.DuplicateResourceException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -49,13 +51,13 @@ public class AuthService {
      * @throws AuthenticationException If credentials are invalid
      */
     public AuthResponseDTO authenticateAndGenerateToken(
-        LoginRequestDTO LoginRequestDTO
+        LoginRequestDTO loginRequestDTO
     ) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                    LoginRequestDTO.getUsernameOrEmail(),
-                    LoginRequestDTO.getPassword()
+                    loginRequestDTO.getUsernameOrEmail(),
+                    loginRequestDTO.getPassword()
                 )
             );
 
@@ -63,7 +65,7 @@ public class AuthService {
         } catch (Exception e) {
             logger.warn(
                 "Authentication failed for user: {}",
-                LoginRequestDTO.getUsernameOrEmail()
+                loginRequestDTO.getUsernameOrEmail()
             );
             throw new AuthenticationException("Invalid credentials");
         }
@@ -99,5 +101,23 @@ public class AuthService {
             );
             throw new AuthenticationException("Registration failed: ");
         }
+    }
+
+    /**
+     * Add auth cookie.
+     *
+     * @param token    the token
+     * @param response the response
+     */
+    public void addAuthCookie(
+        AuthResponseDTO token,
+        HttpServletResponse response
+    ) {
+        Cookie cookie = new Cookie("token", token.getToken());
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(24 * 60 * 60); // 24 hours
+        response.addCookie(cookie);
     }
 }

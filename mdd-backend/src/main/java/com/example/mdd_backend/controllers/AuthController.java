@@ -5,6 +5,7 @@ import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.services.AuthService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,20 +27,21 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponseDTO> createUser(
-        @Valid @RequestBody UserCreateRequestDTO userDTO
+        @Valid @RequestBody UserCreateRequestDTO userDTO, HttpServletResponse response
     ) {
         AuthResponseDTO token = authService.registerAndGenerateToken(userDTO);
+        authService.addAuthCookie(token, response);
         return new ResponseEntity<>(token, HttpStatus.CREATED);
     }
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDTO> loginUser(
-        @Valid @RequestBody LoginRequestDTO LoginRequestDTO
+        @Valid @RequestBody LoginRequestDTO LoginRequestDTO, HttpServletResponse response
     ) {
         AuthResponseDTO token = authService.authenticateAndGenerateToken(
             LoginRequestDTO
         );
-
+        authService.addAuthCookie(token, response);
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
 }
