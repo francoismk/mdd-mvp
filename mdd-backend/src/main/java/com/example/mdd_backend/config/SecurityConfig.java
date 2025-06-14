@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -20,6 +19,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 public class SecurityConfig {
+
+    private final CookieOrHeaderBearerTokenResolver cookieOrHeaderBearerTokenResolver;
+
+    public SecurityConfig(CookieOrHeaderBearerTokenResolver cookieOrHeaderBearerTokenResolver) {
+        this.cookieOrHeaderBearerTokenResolver = cookieOrHeaderBearerTokenResolver;
+    }
 
     @Bean
     SecurityFilterChain apiSecurity(HttpSecurity httpSecurity)
@@ -48,13 +53,10 @@ public class SecurityConfig {
                     .authenticated()
             )
             .oauth2ResourceServer(oauth2 ->
-                oauth2.jwt(jwtConfigurer ->
-                    jwtConfigurer.jwtAuthenticationConverter(
-                        new JwtAuthenticationConverter()
-                    )
-                )
+                oauth2
+                        .bearerTokenResolver(cookieOrHeaderBearerTokenResolver)
+                        .jwt(Customizer.withDefaults())
             );
-
         return httpSecurity.build();
     }
 
