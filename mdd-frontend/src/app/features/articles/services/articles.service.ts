@@ -9,17 +9,15 @@ import {CreateArticle} from '../../../core/models/create-article.interface';
 export class ArticleService {
   private http = inject(HttpClient);
   private baseUrl = "http://localhost:8080/api";
-  private token =
-    "insert_your_token_here";
+
 
   private headers = new HttpHeaders({
-    Authorization: `Bearer ${this.token}`,
     "Content-Type": "application/json",
   });
 
   getArticles(): Observable<Article[]> {
     const url = `${this.baseUrl}/articles?sort=date_asc`;
-    return this.http.get<Article[]>(url, { headers: this.headers });
+    return this.http.get<Article[]>(url, { headers: this.headers, withCredentials: true });
   }
 
   getArticlesById(id: string): Observable<Article> {
