@@ -2,6 +2,7 @@ import {inject, Injectable, signal} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {catchError, tap} from 'rxjs';
 import {LoginRequest, LoginResponse} from '../../../core/models';
+import { RegisterRequest } from '../../../core/models/register-request.interface';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -29,9 +30,17 @@ export class AuthService {
     );
   }
 
-  register(username: string, email: string, password: string) {
+  register(registerRequest: RegisterRequest) {
     const url = `${this.baseUrl}/register`;
-    const body = { username, email, password };
-    return this.http.post(url, body);
+    console.log("je passe dans le service register", registerRequest);
+    return this.http.post(url, registerRequest, { withCredentials: true }).pipe(
+      tap(response => {
+        console.log(response);
+      }),
+      catchError(error => {
+        console.error('Registration failed:', error);
+        throw error;
+      })
+    );
   }
 }
