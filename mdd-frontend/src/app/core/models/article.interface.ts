@@ -1,4 +1,4 @@
-import { Topic, User } from ".";
+import { Topic, User, ArticleComment } from ".";
 
 export interface Article {
   id: string;
@@ -7,5 +7,5 @@ export interface Article {
   createdAt: Date;
   author: User;
   topic: Topic;
-  comments: Comment[];
+  comments: ArticleComment[];
 }
