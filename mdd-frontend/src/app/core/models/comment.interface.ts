@@ -1,6 +1,6 @@
 import { User } from ".";
 
-export interface Comment {
+export interface ArticleComment {
   id: string;
   content: string;
   createdAt: Date;
