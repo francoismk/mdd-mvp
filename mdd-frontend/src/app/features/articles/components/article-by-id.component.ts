@@ -3,6 +3,7 @@ import { ArticleService } from "../services/articles.service";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute } from "@angular/router";
 import { of } from "rxjs";
+import { ArticleComment } from "../../../core/models";
 
 @Component({
   selector: "app-article-by-id",
@@ -17,9 +18,9 @@ import { of } from "rxjs";
     </div>
     <div>
       <h2>Commentaires</h2>
-      @for (comment of comments(); track $index) {
-        <p>{{ comment.author.username }}</p>
-        <p>{{ comment.content }}</p>
+      @for (articleComment of articleComments(); track $index) {
+        <p>{{ articleComment.author.username }}</p>
+        <p>{{ articleComment.content }}</p>
       }
     </div>
   `,
@@ -34,14 +35,16 @@ export class ArticleByIdComponent {
       : of(null),
     { initialValue: null },
   );
-  readonly comments = computed(() => this.article()?.comments ?? []);
+  readonly articleComments = computed(
+    (): ArticleComment[] => this.article()?.comments ?? [],
+  );
 
   constructor() {
     effect(() => {
       console.log("reception de l'article suivant : ", this.article());
       console.log("reception de l'id ????", this.articleId);
       console.log("petit test des commentaires", this.article()?.comments);
-      console.log("test de computed", this.comments());
+      console.log("test de computed", this.articleComments());
     });
   }
 }
