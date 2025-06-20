@@ -73,8 +73,7 @@ public class UserController {
     @PostMapping("/{themeId}/subscriptions")
     public ResponseEntity<UserResponseDTO> subscribeToTheme(
         @PathVariable String themeId,
-        Authentication authentication,
-        HttpServletRequest request
+        Authentication authentication
     ) {
         String userId = authentication.getName();
         UserResponseDTO user = userService.subscribeUserToTheme(
