@@ -3,7 +3,9 @@ import { ArticleService } from "../services/articles.service";
 import { toSignal } from "@angular/core/rxjs-interop";
 import { ActivatedRoute } from "@angular/router";
 import { of } from "rxjs";
-import { ArticleComment } from "../../../core/models";
+import type { ArticleComment } from "../../../core/models";
+import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
+import { CommentService } from "../../comments/services/comments.service";
 
 @Component({
   selector: "app-article-by-id",
@@ -22,8 +24,19 @@ import { ArticleComment } from "../../../core/models";
         <p>{{ articleComment.author.username }}</p>
         <p>{{ articleComment.content }}</p>
       }
+      <h2>test du formulaire création de commentaire</h2>
+      <form [formGroup]="createCommentForm" (ngSubmit)="onSubmit()">
+
+      <label for="commentContent">Commentaire: </label>
+      <textarea id="content" formControlName="content"></textarea>
+
+      <button type="submit">Envoyer le commentaire</button>
+    </form>
     </div>
   `,
+  imports: [
+    ReactiveFormsModule
+  ]
 })
 export class ArticleByIdComponent {
   private articleService = inject(ArticleService);
@@ -38,6 +51,36 @@ export class ArticleByIdComponent {
   readonly articleComments = computed(
     (): ArticleComment[] => this.article()?.comments ?? [],
   );
+  private formBuilder = inject(FormBuilder);
+  private commentService = inject(CommentService);
+
+  createCommentForm = this.formBuilder.nonNullable.group({
+    content: "",
+  });
+
+  onSubmit() {
+    console.log("test de l'envoi du formulaire");
+    console.log(this.createCommentForm.value);
+    if (this.createCommentForm.valid && this.articleId) {
+      const payload = this.createCommentForm.getRawValue();
+      this.commentService.createComment(payload, this.articleId).subscribe({
+        next: (response) => {
+          console.log('Comment created successfully:', response);
+          const article = this.article();
+          if (article?.comments) {
+            article.comments.push(response);
+          }
+          this.createCommentForm.reset();
+        },
+        error: (error) => {
+          console.error('Error creating comment:', error);
+        }
+      });
+    }
+    else {
+      console.error('Form is invalid:', this.createCommentForm.errors);
+    }
+  }
 
   constructor() {
     effect(() => {

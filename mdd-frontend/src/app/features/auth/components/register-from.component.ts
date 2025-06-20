@@ -34,7 +34,6 @@ import { AuthService } from "../services/auth.service";
                     <div class="error">Le nom d'utilisateur doit contenir au moins 3 caractères</div>
                 }
             </div>
-
             <div class="form-group">
             <label for="password">Password: </label>
             <input id="password" type="password" formControlName="password">

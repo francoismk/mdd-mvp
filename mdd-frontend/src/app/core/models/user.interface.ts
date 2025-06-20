@@ -1,4 +1,4 @@
-import { Topic } from ".";
+import type { Topic } from ".";
 
 export interface User {
   id: string;
