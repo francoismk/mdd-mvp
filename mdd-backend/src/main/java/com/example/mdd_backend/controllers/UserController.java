@@ -42,6 +42,19 @@ public class UserController {
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUser(
+        Authentication authentication
+    ) {
+        String userEmail = authentication.getName();
+        UserResponseDTO user = userService.getUserByEmail(userEmail);
+
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
         @Valid @RequestBody UserCreateRequestDTO userDTO
@@ -92,4 +105,15 @@ public class UserController {
         UserResponseDTO updatedUser = userService.updateUser(id, updateUserDTO);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDTO> updateCurrentUser(
+        @RequestBody UserUpdateRequestDTO updateUserDTO,
+        Authentication authentication
+    ) {
+        String userEmail = authentication.getName();
+        UserResponseDTO updatedUser = userService.updateUserByUsername(userEmail, updateUserDTO);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
 }

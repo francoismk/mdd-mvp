@@ -358,6 +358,66 @@ public class UserService {
     }
 
     /**
+     * Updates user information.
+     *
+     * Validates email uniqueness before updating.
+     *
+     * @param userEmail username of the user to update
+     * @param updateUserDTO Updated user data
+     * @return Updated user information
+     * @throws ResourceNotFoundException If user doesn't exist
+     * @throws DuplicateResourceException If new email already exists
+     * @throws DatabaseOperationException On update failure
+     */
+    public UserResponseDTO updateUserByUsername(
+            String userEmail,
+            UserUpdateRequestDTO updateUserDTO
+    ) {
+        try {
+            DBUser user = userRepository
+                    .findByEmail(userEmail)
+                    .orElseThrow(() ->
+                            new ResourceNotFoundException(
+                                    "User not found with email: " + userEmail
+                            )
+                    );
+            if (
+                    updateUserDTO.getEmail() != null &&
+                            !updateUserDTO.getEmail().equals(user.getEmail())
+            ) {
+                if (
+                        userRepository
+                                .findByEmail(updateUserDTO.getEmail())
+                                .isPresent()
+                ) {
+                    throw new DuplicateResourceException(
+                            "Email already exists"
+                    );
+                }
+                user.setEmail(updateUserDTO.getEmail());
+            }
+
+            if (updateUserDTO.getUsername() != null) {
+                user.setUsername(updateUserDTO.getUsername());
+            }
+
+            if (updateUserDTO.getPassword() != null) {
+                user.setPassword(
+                        passwordEncoder.encode(updateUserDTO.getPassword())
+                );
+            }
+
+            DBUser savedUser = userRepository.save(user);
+            return buildUserDto(savedUser);
+        } catch (ResourceNotFoundException | DuplicateResourceException e) {
+            throw e;
+        } catch (Exception e) {
+            logger.error("Error while update user: {}", e.getMessage(), e);
+            throw new DatabaseOperationException("Failed to update user");
+        }
+    }
+
+    /**
      * Builds user response DTO with subscription details.
      *
      * @param user Database user entity

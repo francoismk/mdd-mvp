@@ -1,6 +1,7 @@
 package com.example.mdd_backend.controllers;
 
 import com.example.mdd_backend.dtos.ArticleResponseDTO;
+import com.example.mdd_backend.dtos.TopicCreateRequestDTO;
 import com.example.mdd_backend.dtos.TopicResponseDTO;
 import com.example.mdd_backend.services.TopicService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -29,7 +30,7 @@ public class TopicController {
 
     @PostMapping
     public ResponseEntity<TopicResponseDTO> createTheme(
-        @Valid @RequestBody ArticleResponseDTO topicDTO
+        @Valid @RequestBody TopicCreateRequestDTO topicDTO
     ) {
         if (topicDTO == null) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

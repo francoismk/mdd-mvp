@@ -1,0 +1,11 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# IDEs and editors
+.idea/
+.vscode/
+
+# Custom rules
+zed.rules
+
