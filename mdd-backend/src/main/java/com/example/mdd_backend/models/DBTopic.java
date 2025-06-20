@@ -14,4 +14,5 @@ public class DBTopic {
 
     @Indexed(unique = true)
     private String name;
+    private String description;
 }
