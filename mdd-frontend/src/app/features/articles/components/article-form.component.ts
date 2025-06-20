@@ -1,17 +1,24 @@
 import {Component, computed, inject, signal} from '@angular/core';
 import { ArticleService } from '../services/articles.service';
 import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import { TopicService } from '../../topics/services/topics.service';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-article-form',
   standalone: true,
   template: `
     <form [formGroup]="createArticleForm" (ngSubmit)="onSubmit()">
+      
+      <label for="topicId">topic:</label>
+      <select id="topicId" formControlName="topicId">
+        @for (topic of topics(); track topic.id) {
+          <option [value]="topic.id">{{ topic.name }}</option>
+        }
+      </select>
+      
       <label for="title">Titre: </label>
       <input id="title" type="text" formControlName="title">
-
-      <label for="topicId">topic id:</label>
-      <input id="topicId" type="text" formControlName="topicId">
 
       <label for="content">Contenu: </label>
       <textarea id="content" formControlName="content"></textarea>
@@ -27,6 +34,8 @@ export class ArticleFormComponent {
 
   private formBuilder = inject(FormBuilder);
   private articleService = inject(ArticleService);
+  private topicService = inject(TopicService);
+  topics = toSignal(this.topicService.getTopics(), { initialValue: [] });
 
   createArticleForm = this.formBuilder.nonNullable.group({
     title: "",
