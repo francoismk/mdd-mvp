@@ -8,6 +8,7 @@ import { ArticleByIdComponent } from "./features/articles/components/article-by-
 import { UserProfileComponent } from "./features/user-profile/components/user-update.component";
 
 export const routes: Routes = [
+  { path: "", redirectTo: "/login", pathMatch: "full" },
   { path: "articles", component: ArticleListComponent },
   { path: "topics", component: TopicListComponent },
   { path: "create-article", component: ArticleFormComponent },
@@ -15,4 +16,5 @@ export const routes: Routes = [
   { path: "register", component: RegisterFormComponent },
   { path: "article/:id", component: ArticleByIdComponent },
   { path: "user-profile", component: UserProfileComponent },
+  { path: "**", redirectTo: "/login" },
 ];
