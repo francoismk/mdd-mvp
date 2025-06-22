@@ -6,9 +6,11 @@ import { AuthFormComponent } from "./features/auth/components/auth-form.componen
 import { RegisterFormComponent } from "./features/auth/components/register-from.component";
 import { ArticleByIdComponent } from "./features/articles/components/article-by-id.component";
 import { UserProfileComponent } from "./features/user-profile/components/user-update.component";
+import { HomeComponent } from "./features/home/home.component";
 
 export const routes: Routes = [
-  { path: "", redirectTo: "/login", pathMatch: "full" },
+  { path: "", redirectTo: "home", pathMatch: "full" },
+  { path: "home", component: HomeComponent },
   { path: "articles", component: ArticleListComponent },
   { path: "topics", component: TopicListComponent },
   { path: "create-article", component: ArticleFormComponent },
@@ -16,5 +18,5 @@ export const routes: Routes = [
   { path: "register", component: RegisterFormComponent },
   { path: "article/:id", component: ArticleByIdComponent },
   { path: "user-profile", component: UserProfileComponent },
-  { path: "**", redirectTo: "/login" },
+  { path: "**", redirectTo: "/home" },
 ];
