@@ -122,11 +122,13 @@ import { RouterModule } from "@angular/router";
     }
 
     .comments-section {
+      max-width: 600px;
     }
 
     .comments-list {
       margin-left: 2rem;
       margin-bottom: 2rem;
+      max-width: 500px;
     }
 
     .comment-container {
@@ -134,11 +136,13 @@ import { RouterModule } from "@angular/router";
       gap: 1rem;
       margin-bottom: 1rem;
       align-items: flex-start;
+      max-width: 100%;
     }
 
     .comment-author {
-      flex: 0 0 50px;
+      flex: 0 0 80px;
       word-wrap: break-word;
+      font-size: 0.9rem;
     }
 
     .comment-card {
@@ -146,6 +150,7 @@ import { RouterModule } from "@angular/router";
       border-radius: 8px;
       padding: 1rem;
       flex: 1;
+      max-width: 400px;
     }
 
     .comment-header {
@@ -163,6 +168,7 @@ import { RouterModule } from "@angular/router";
     .comment-form {
       margin-top: 2rem;
       margin-left: 2rem;
+      max-width: 500px;
     }
 
     .form-group {
