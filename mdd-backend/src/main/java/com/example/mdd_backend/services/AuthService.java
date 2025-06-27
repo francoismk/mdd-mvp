@@ -114,10 +114,24 @@ public class AuthService {
         HttpServletResponse response
     ) {
         Cookie cookie = new Cookie("token", token.getToken());
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60); // 24 hours
+        cookie.setSecure(false);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+    }
+
+    /**
+     * Remove auth cookie.
+     *
+     * @param response the response
+     */
+    public void removeAuthCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        cookie.setSecure(false);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
         response.addCookie(cookie);
     }
 }
