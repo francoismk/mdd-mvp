@@ -14,54 +14,52 @@ import { RouterModule } from "@angular/router";
   standalone: true,
   template: `
     <div class="article-container">
-      <div class="article-layout">
-
-      <div class="arrow-column">
+      <div class="article-header">
         <a routerLink="/articles" class="back-button">
-          <img src="assets/images/back-icon.svg" alt="Arrow Left">
+          <img src="assets/images/back-icon.svg" alt="Arrow Left" class="back-icon">
         </a>
-      </div>
-
-      <div class="content-column">
         <h1 class="article-title">{{ article()?.title }}</h1>
-      <div class="article-meta">
-      <span class="meta-item">{{ article()?.createdAt }}</span>
-      <span class="meta-item">{{ article()?.author?.username }}</span>
-      <span class="meta-item">{{ article()?.topic?.name }}</span>
       </div>
 
-      <div class="article-content">
-      <p>{{ article()?.content }}</p>
-      </div>
-
-    <hr class="divider">
-
-    <div class="comments-section">
-      <h2 class="section-title">Commentaires</h2>
-      
-      <div class="comments-list">
-      @for (articleComment of articleComments(); track $index) {
-        <div class="comment-container">
-          <div class="comment-author">  
-            {{ articleComment.author.username }}
-          </div>
-          <div class="comment-card">
-          <p class="comment-content">{{ articleComment.content }}</p>
-          </div>
+      <div class="article-main">
+        <div class="article-meta">
+          <span class="meta-item">{{ article()?.createdAt }}</span>
+          <span class="meta-item">{{ article()?.author?.username }}</span>
+          <span class="meta-item">{{ article()?.topic?.name }}</span>
         </div>
-      }
-      </div>
-      <form [formGroup]="createCommentForm" (ngSubmit)="onSubmit()" class="comment-form">
-        <div class="form-group">
-          <textarea id="content" formControlName="content" placeholder="Écrivez votre commentaire" class="comment-input"></textarea>
-          <button type="submit">
-            <img src="assets/images/send-icon.svg" alt="Send">
-          </button>
+
+        <div class="article-content">
+          <p>{{ article()?.content }}</p>
         </div>
-      </form>
+
+        <hr class="divider">
+
+        <div class="comments-section">
+          <p class="section-title">Commentaires</p>
+
+          <div class="comments-list">
+          @for (articleComment of articleComments(); track $index) {
+            <div class="comment-container">
+              <div class="comment-author">
+                {{ articleComment.author.username }}
+              </div>
+              <div class="comment-card">
+              <p class="comment-content">{{ articleComment.content }}</p>
+              </div>
+            </div>
+          }
+          </div>
+          <form [formGroup]="createCommentForm" (ngSubmit)="onSubmit()" class="comment-form">
+            <div class="form-group">
+              <textarea id="content" formControlName="content" placeholder="Écrivez votre commentaire" class="comment-input"></textarea>
+              <button type="submit" class="send-button">
+                <img src="assets/images/send-icon.svg" alt="Send">
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
   `,
   styles: `
     .article-container {
@@ -70,21 +68,11 @@ import { RouterModule } from "@angular/router";
       padding: 2rem 1.5rem;
     }
 
-    .article-layout {
+    .article-header {
       display: flex;
-      gap: 2rem;
-    }
-
-    .arrow-column {
-      flex: 0 0 50px;
-    }
-
-    .content-column {
-      flex: 1;
-    }
-
-    .back-button {
-      margin-right: 1rem;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
     }
 
     .back-icon {
@@ -96,6 +84,10 @@ import { RouterModule } from "@angular/router";
       font-size: 1.75rem;
       margin: 0;
       color: #333;
+    }
+
+    .article-main {
+      padding-left: calc(24px + 1rem);
     }
 
     .article-meta {
@@ -130,7 +122,6 @@ import { RouterModule } from "@angular/router";
     }
 
     .comments-section {
-      max-width: 80%;
     }
 
     .comments-list {
@@ -142,10 +133,12 @@ import { RouterModule } from "@angular/router";
       display: flex;
       gap: 1rem;
       margin-bottom: 1rem;
+      align-items: flex-start;
     }
 
     .comment-author {
-      width: 50px;
+      flex: 0 0 50px;
+      word-wrap: break-word;
     }
 
     .comment-card {
@@ -175,11 +168,12 @@ import { RouterModule } from "@angular/router";
     .form-group {
       display: flex;
       gap: 1rem;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .comment-input {
       flex: 1;
+      min-width: 0;
       min-height: 44px;
       padding: 0.75rem 1rem;
       border: 1px solid #ddd;
@@ -189,7 +183,7 @@ import { RouterModule } from "@angular/router";
     }
 
     .send-button {
-      background: #7763c5;
+      background: none;
       border: none;
       border-radius: 8px;
       padding: 0.5rem;
@@ -200,18 +194,18 @@ import { RouterModule } from "@angular/router";
       transition: background-color 0.2s;
     }
 
-    .send-button:hover {
-      background-color: #6854b8;
-    }
-
     .send-icon {
       width: 20px;
       height: 20px;
     }
 
     @media (max-width: 768px) {
-      .article-container {
-        padding: 1.5rem 1rem;
+      .article-main {
+        padding-left: 0;
+      }
+
+      .article-header {
+        align-items: flex-start;
       }
 
       .article-title {
@@ -223,13 +217,35 @@ import { RouterModule } from "@angular/router";
         gap: 0.5rem 1.25rem;
       }
 
-      .form-group {
-        flex-direction: column;
+      .meta-item {
+        white-space: nowrap;
       }
 
-      .send-button {
+      .comments-section {
+        max-width: 100%;
+      }
+
+      .comments-list {
+        margin-left: 0;
+      }
+
+      .comment-form {
+        margin-left: 0;
+      }
+
+      .comment-container {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.5rem;
+      }
+
+      .comment-author {
+        flex-basis: auto;
+        width: auto;
+      }
+
+      .comment-card {
         width: 100%;
-        padding: 0.75rem;
       }
     }
     `,
