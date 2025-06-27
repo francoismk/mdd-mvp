@@ -44,4 +44,10 @@ public class AuthController {
         authService.addAuthCookie(token, response);
         return new ResponseEntity<>(token, HttpStatus.OK);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logoutUser(HttpServletResponse response) {
+        authService.removeAuthCookie(response);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }

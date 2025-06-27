@@ -1,12 +1,14 @@
-import { Component } from "@angular/core";
-import { RouterModule } from "@angular/router";
+import { Component, inject } from "@angular/core";
+import { Router, RouterModule } from "@angular/router";
 import { CommonModule } from "@angular/common";
+import { AuthService } from "../../../features/auth/services/auth.service";
 
 @Component({
-  selector: "app-navbar",
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+	selector: "app-navbar",
+	standalone: true,
+	imports: [CommonModule, RouterModule],
+	template: `
+  @if (authService.isLoggedIn()) {
     <nav class="navbar">
       <div class="logo">
         <a routerLink="/"><img src="assets/images/logo.svg" alt="MDD Logo" class="logo-img"></a>
@@ -17,25 +19,25 @@ import { CommonModule } from "@angular/common";
   </button>
 
       <div class="nav-links">
-        <a routerLink="/" class="deconnected-link">Se déconnecter</a>
+        <a (click)="logout()" class="deconnected-link" style="cursor: pointer;">Se déconnecter</a>
         <a routerLink="/articles" routerLinkActive="active">Articles</a>
         <a routerLink="/topics" routerLinkActive="active">Thèmes</a>
         <a routerLink="/user-profile" routerLinkActive="active" #profileLink="routerLinkActive">
-        <img [src]="profileLink.isActive ? 'assets/images/profil-active.svg' : 'assets/images/profil.svg'" 
-               alt="Profil" 
+        <img [src]="profileLink.isActive ? 'assets/images/profil-active.svg' : 'assets/images/profil.svg'"
+               alt="Profil"
                class="profil-img">
         </a>
       </div>
 
-      <div class="mobile-menu-overlay" 
-       [class.active]="isMenuOpen" 
+      <div class="mobile-menu-overlay"
+       [class.active]="isMenuOpen"
        (click)="closeMenu()">
   </div>
 
   <aside class="mobile-menu" [class.active]="isMenuOpen">
   <div class="mobile-menu-content">
     <div class="menu-links">
-      <a routerLink="/" class="deconnected-link" (click)="closeMenu()">Se déconnecter</a>
+      <a (click)="logout()" class="deconnected-link" (click)="closeMenu()">Se déconnecter</a>
       <a routerLink="/articles" routerLinkActive="active" (click)="closeMenu()">Articles</a>
       <a routerLink="/topics" routerLinkActive="active" (click)="closeMenu()">Thèmes</a>
     </div>
@@ -47,10 +49,11 @@ import { CommonModule } from "@angular/common";
   </div>
 </aside>
     </nav>
-    
+  }
+
   `,
-  styles: [
-    `
+	styles: [
+		`
     .navbar {
       display: flex;
       justify-content: space-between;
@@ -59,7 +62,7 @@ import { CommonModule } from "@angular/common";
       border-bottom: 2px solid #ccc;
     }
 
-    
+
     .nav-links {
       display: flex;
       gap: 1rem;
@@ -88,7 +91,7 @@ import { CommonModule } from "@angular/common";
       height: 81px;
       width: 140px;
     }
-    
+
     .profil-img {
       height: 48px;
       width: 48px;
@@ -196,22 +199,26 @@ import { CommonModule } from "@angular/common";
       display: none; /* Cache le menu mobile sur desktop */
     }
   }
-    `
-  ],
+    `,
+	],
 })
 export class NavbarComponent {
+	isMenuOpen = false;
+	authService = inject(AuthService);
 
-  isMenuOpen = false;
+	toggleMenu() {
+		this.isMenuOpen = !this.isMenuOpen;
+	}
 
-  toggleMenu() {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-  
-  closeMenu() {
-    this.isMenuOpen = false;
-  }
-  
-  logout() {
-    console.log("logout");
-  }
+	closeMenu() {
+		this.isMenuOpen = false;
+	}
+
+	router = inject(Router);
+
+	logout() {
+		this.authService.logout().subscribe(() => {
+			this.router.navigate(["/login"]);
+		});
+	}
 }
