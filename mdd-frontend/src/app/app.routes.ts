@@ -7,16 +7,17 @@ import { RegisterFormComponent } from "./features/auth/components/register-from.
 import { ArticleByIdComponent } from "./features/articles/components/article-by-id.component";
 import { UserProfileComponent } from "./features/user-profile/components/user-update.component";
 import { HomeComponent } from "./features/home/home.component";
+import { authGuard } from "./core/guards/auth.guard";
 
 export const routes: Routes = [
   { path: "", redirectTo: "home", pathMatch: "full" },
   { path: "home", component: HomeComponent },
-  { path: "articles", component: ArticleListComponent },
-  { path: "topics", component: TopicListComponent },
-  { path: "create-article", component: ArticleFormComponent },
+  { path: "articles", component: ArticleListComponent, canActivate: [authGuard] },
+  { path: "topics", component: TopicListComponent, canActivate: [authGuard] },
+  { path: "create-article", component: ArticleFormComponent, canActivate: [authGuard] },
   { path: "login", component: AuthFormComponent },
   { path: "register", component: RegisterFormComponent },
-  { path: "article/:id", component: ArticleByIdComponent },
-  { path: "user-profile", component: UserProfileComponent },
+  { path: "article/:id", component: ArticleByIdComponent, canActivate: [authGuard] },
+  { path: "user-profile", component: UserProfileComponent, canActivate: [authGuard] },
   { path: "**", redirectTo: "/home" },
 ];
