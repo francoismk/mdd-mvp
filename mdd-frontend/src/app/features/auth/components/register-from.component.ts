@@ -1,5 +1,5 @@
 import { Component, inject } from "@angular/core";
-import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { CommonModule } from "@angular/common";
 import { AuthService } from "../services/auth.service";
 import { RouterModule } from "@angular/router";
@@ -49,12 +49,16 @@ import { RouterModule } from "@angular/router";
              @if (password?.errors?.['required'] && password?.touched) {
                     <div class="error-message">Le mot de passe est requis</div>
                 }
-                @if (password?.errors?.['minlength'] && password?.touched) {
-                    <div class="error-message">Le mot de passe doit contenir au moins 8 caractères</div>
-                }
+              @if ((password?.errors?.['minlength'] || password?.errors?.['pattern']) && password?.touched) {
+                  <div class="error-message">
+                      Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial
+                  </div>
+              }
             </div>
 
-            <button type="submit" [disabled]="registerForm.invalid">Créer un compte</button>
+            <button type="submit" [disabled]="registerForm.invalid"
+            [title]="registerForm.invalid ? 'Formulaire invalide' : 'Créer un compte'"
+            >Créer un compte</button>
         </form>
     </div>
     </div>
@@ -134,6 +138,14 @@ import { RouterModule } from "@angular/router";
     padding: 0;
   }
 
+  button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #cccccc;
+  border-color: #aaaaaa;
+  color: #666666;
+}
+
   input:focus {
     outline: none;
     border-color: #7763C5;
@@ -177,7 +189,9 @@ export class RegisterFormComponent {
     registerForm = this.formBuilder.group({
         username: ["", [Validators.required, Validators.minLength(3)]],
         email: ["", [Validators.required, Validators.email]],
-        password: ["", [Validators.required, Validators.minLength(8)]],
+        password: ["", [Validators.required, 
+            Validators.minLength(8), 
+            this.validatePassword]],
     })
 
     onSubmit() {
@@ -198,6 +212,21 @@ export class RegisterFormComponent {
                 })
             }
         }
+    }
+
+    private validatePassword(control: AbstractControl) {
+      const value = control.value;
+      if (!value) return null;
+      
+      if (value.length < 8) return { minlength: true };
+      
+      const hasNumber = /[0-9]/.test(value);
+      const hasLower = /[a-z]/.test(value);
+      const hasUpper = /[A-Z]/.test(value);
+      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+      
+      const valid = hasNumber && hasLower && hasUpper && hasSpecial;
+      return valid ? null : { pattern: true };
     }
 
     get username() {
