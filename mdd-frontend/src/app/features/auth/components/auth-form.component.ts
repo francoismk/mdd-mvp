@@ -1,7 +1,7 @@
 import {Component, inject} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule,} from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule, Validators,} from '@angular/forms';
 import {AuthService} from '../services/auth.service';
-import {LoginRequest} from '../../../core/models';
+import type {LoginRequest} from '../../../core/models';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
@@ -21,14 +21,22 @@ import { RouterModule } from '@angular/router';
       <div class="form-group">
       <label for="usernameOrEmail">Email ou nom d'utilisateur</label>
       <input id="usernameOrEmail" type="text" formControlName="usernameOrEmail">
+      @if (usernameOrEmail?.errors?.['required'] && usernameOrEmail?.touched) {
+                    <div class="error-message">Le nom d'utilisateur est requis</div>
+                } 
       </div>
 
       <div class="form-group">
       <label for="password">Mot de passe</label>
-      <input id="password" type="text" formControlName="password">
+      <input id="password" type="password" formControlName="password">
+      @if (password?.errors?.['required'] && password?.touched) {
+                    <div class="error-message">Le mot de passe est requis</div>
+                }
       </div>
 
-      <button type="submit">Se connecter</button>
+      <button type="submit" [disabled]="authLoginForm.invalid"
+      [title]="authLoginForm.invalid ? 'Formulaire invalide' : 'Se connecter'"
+      >Se connecter</button>
     </form>
     </div>
   </div>
@@ -108,6 +116,20 @@ import { RouterModule } from '@angular/router';
     padding: 0;
   }
 
+  button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #cccccc;
+  border-color: #aaaaaa;
+  color: #666666;
+}
+
+  .error-message {
+    color: #ff4444;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+
   input:focus {
     outline: none;
     border-color: #7763C5;
@@ -145,8 +167,8 @@ export class AuthFormComponent {
   private authService = inject(AuthService);
 
   authLoginForm = this.formBuilder.nonNullable.group({
-    usernameOrEmail: "",
-    password: "",
+    usernameOrEmail: ["", [Validators.required]],
+    password: ["", [Validators.required]],
   })
 
   onSubmit() {
@@ -168,6 +190,14 @@ export class AuthFormComponent {
       console.error('Form is invalid:', this.authLoginForm.errors);
     }
   }
+
+  get usernameOrEmail() {
+    return this.authLoginForm.get("usernameOrEmail");
+  }
+
+  get password() {
+    return this.authLoginForm.get("password");
+  } 
 }
 
 
