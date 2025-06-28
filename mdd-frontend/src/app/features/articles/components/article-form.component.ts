@@ -1,6 +1,6 @@
 import {Component, inject} from '@angular/core';
 import { ArticleService } from '../services/articles.service';
-import {FormBuilder, ReactiveFormsModule} from '@angular/forms';
+import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
 import { TopicService } from '../../topics/services/topics.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
@@ -17,19 +17,36 @@ import { RouterLink } from '@angular/router';
     </div>
     <form [formGroup]="createArticleForm" (ngSubmit)="onSubmit()">
 
+    <div class="form-group">
       <select id="topicId" formControlName="topicId" [class.placeholder]="!createArticleForm.get('topicId')?.value">
         <option value="" disabled selected>Sélectionnez un thème</option>
         @for (topic of topics(); track topic.id) {
           <option [value]="topic.id">{{ topic.name }}</option>
         }
       </select>
+      @if (createArticleForm.get('topicId')?.errors?.['required'] && createArticleForm.get('topicId')?.touched) {
+        <div class="error-message">Le thème est requis</div>
+      }   
+    </div>
 
+    <div class="form-group">
       <input id="title" type="text" formControlName="title" placeholder="Titre de l'article" required>
+      @if (createArticleForm.get('title')?.errors?.['required'] && createArticleForm.get('title')?.touched) {
+        <div class="error-message">Le titre est requis</div>
+      }
+    </div>
 
+    <div class="form-group">
       <textarea id="content" formControlName="content" placeholder="Contenu de l'article"></textarea>
+      @if (createArticleForm.get('content')?.errors?.['required'] && createArticleForm.get('content')?.touched) {
+        <div class="error-message">Le contenu est requis</div>
+      }
+    </div>
 
-      <button type="submit">Créer</button>
-    </form>
+    <button type="submit" [disabled]="createArticleForm.invalid"
+    [title]="createArticleForm.invalid ? 'Formulaire invalide' : 'Créer un article'"
+    >Créer</button>
+  </form>
   `,
   styles: [`
     :host {
@@ -62,6 +79,13 @@ import { RouterLink } from '@angular/router';
     form {
       display: flex;
       flex-direction: column;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
     }
 
     label {
@@ -127,6 +151,20 @@ import { RouterLink } from '@angular/router';
       align-self: center;
     }
 
+    button[disabled] {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #cccccc;
+      border-color: #aaaaaa;
+      color: #666666;
+    }
+
+    .error-message {
+      color: #ff4444;
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
     @media (max-width: 768px) {
       .header {
         flex-direction: column;
@@ -161,10 +199,9 @@ export class ArticleFormComponent {
   topics = toSignal(this.topicService.getTopics(), { initialValue: [] });
 
   createArticleForm = this.formBuilder.nonNullable.group({
-    title: "",
-    content: "",
-    // temporaire, topic et author seront gérés par la suite
-    topicId: "",
+    title: ["", [Validators.required]],
+    content: ["", [Validators.required]],
+    topicId: ["", [Validators.required]],
   })
 
   onSubmit() {
