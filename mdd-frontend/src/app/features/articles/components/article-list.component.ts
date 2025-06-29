@@ -1,22 +1,26 @@
-import { Component, effect, inject } from "@angular/core";
-import { ArticleService } from "../services/articles.service";
-import { toSignal } from "@angular/core/rxjs-interop";
+import { Component, effect, inject, signal } from "@angular/core";
+
 import { Article } from "../../../core/models";
-import { Router } from "@angular/router";
+import { ArticleService } from "../services/articles.service";
 import { CommonModule } from "@angular/common";
+import { Router } from "@angular/router";
 import { RouterModule } from "@angular/router";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: "app-articles-pages",
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+	selector: "app-articles-pages",
+	standalone: true,
+	imports: [CommonModule, RouterModule],
+	template: `
     <div class="articles-container">
       <div class="articles-header">
       <a routerLink="/create-article" class="create-button">Créer un article</a>
       <div class="filter-container">
       <p>Trier par</p>
-      <img src="assets/images/down-arrow-icon.svg" alt="Down Arrow">
+      <div class="filter-icon">
+        <img (click)="sortDescArticle()" src="assets/images/down-arrow-icon.svg" alt="Down Arrow" class="sort-arrow">
+        <img (click)="sortAscArticle()" src="assets/images/down-arrow-icon.svg" alt="up Arrow" class =" sort-arrow arrow-up">
+      </div>
       </div>
       </div>
       <div class="articles-grid">
@@ -33,7 +37,7 @@ import { RouterModule } from "@angular/router";
       </div>
     </div>
   `,
-  styles: `
+	styles: `
   .articles-container {
       width: 100%;
       padding: 2rem 4rem;
@@ -64,14 +68,20 @@ import { RouterModule } from "@angular/router";
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      cursor: pointer;
       font-weight: 600;
     }
 
     .filter-icon {
+      cursor: pointer;
+      display: flex;
       width: 16px;
       height: 16px;
+      gap: 1rem;
     }
+
+    .arrow-up {
+  transform: rotate(180deg);
+}
 
     .articles-grid {
       display: grid;
@@ -134,20 +144,44 @@ import { RouterModule } from "@angular/router";
         align-items: flex-start;
       }
     }
-  `
+  `,
 })
 export class ArticleListComponent {
-  private articleService = inject(ArticleService);
-  private readonly router = inject(Router);
-  articles = toSignal(this.articleService.getArticles(), { initialValue: [] });
+	private articleService = inject(ArticleService);
+	private readonly router = inject(Router);
+	articles = signal<Article[]>([]);
 
-  constructor() {
-    effect(() => {
-      console.log("articles received :", this.articles());
-    });
-  }
+	sortOrder = signal<"asc" | "desc">("asc");
 
-  handleClick(article: Article) {
-    this.router.navigate(["/article", article.id]);
-  }
+	constructor() {
+		this.loadArticles("asc");
+		effect(() => {
+			console.log("articles received :", this.articles());
+		});
+	}
+
+	private loadArticles(order: "asc" | "desc") {
+		const observable =
+			order === "asc"
+				? this.articleService.getArticlesAsc()
+				: this.articleService.getArticlesDesc();
+
+		// S'abonner à l'observable et mettre à jour le signal
+		observable.subscribe((articles) => {
+			this.articles.set(articles);
+			this.sortOrder.set(order);
+		});
+	}
+
+	handleClick(article: Article) {
+		this.router.navigate(["/article", article.id]);
+	}
+
+	sortDescArticle() {
+		this.loadArticles("desc");
+	}
+
+	sortAscArticle() {
+		this.loadArticles("asc");
+	}
 }
