@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * The type Article controller.
+ */
 @RestController
 @RequestMapping("/api/articles")
 @Tag(name = "Articles", description = "Article management operations")
@@ -22,6 +25,13 @@ public class ArticleController {
         this.articleService = articleService;
     }
 
+    /**
+     * Create article.
+     *
+     * @param articleDTO     the article dto
+     * @param authentication the authentication
+     * @return the article created
+     */
     @PostMapping
     public ResponseEntity<ArticleResponseDTO> createArticle(
         @Valid @RequestBody ArticleCreateRequestDTO articleDTO,
@@ -39,6 +49,12 @@ public class ArticleController {
         return new ResponseEntity<>(createdArticle, HttpStatus.CREATED);
     }
 
+    /**
+     * Gets all articles.
+     *
+     * @param sortOrder the sort order
+     * @return the all articles
+     */
     @GetMapping
     public ResponseEntity<List<ArticleResponseDTO>> getAllArticles(
         @RequestParam(name = "sort", defaultValue = "date_asc") String sortOrder
@@ -53,6 +69,12 @@ public class ArticleController {
         return new ResponseEntity<>(articles, HttpStatus.OK);
     }
 
+    /**
+     * Gets article by id.
+     *
+     * @param id the id
+     * @return the article by id
+     */
     @GetMapping("/{id}")
     public ResponseEntity<ArticleResponseDTO> getArticleById(
         @PathVariable String id
@@ -65,6 +87,12 @@ public class ArticleController {
         return new ResponseEntity<>(article, HttpStatus.OK);
     }
 
+    /**
+     * Delete article by id response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteArticleById(@PathVariable String id) {
         articleService.deleteArticle(id);

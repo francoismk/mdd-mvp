@@ -28,6 +28,13 @@ public class TopicController {
         this.topicService = topicService;
     }
 
+    /**
+     * Creates a new topic.
+     *
+     * @param topicDTO The DTO containing the topic's information. Must be a valid object.
+     * @return ResponseEntity containing the created TopicResponseDTO if successful,
+     *         or an HTTP 400 Bad Request status if the topicDTO is null.
+     */
     @PostMapping
     public ResponseEntity<TopicResponseDTO> createTheme(
         @Valid @RequestBody TopicCreateRequestDTO topicDTO
@@ -40,6 +47,13 @@ public class TopicController {
         return new ResponseEntity<>(createdTheme, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves a topic by its ID.
+     *
+     * @param id The ID of the topic to retrieve.
+     * @return ResponseEntity containing the TopicResponseDTO if found,
+     *         or an HTTP 404 Not Found status if the topic does not exist.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<TopicResponseDTO> getThemeById(
         @PathVariable String id
@@ -52,6 +66,12 @@ public class TopicController {
         return new ResponseEntity<>(theme, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all topics.
+     *
+     * @return ResponseEntity containing a list of TopicResponseDTO if topics exist,
+     *         or an HTTP 204 No Content status if no topics are found.
+     */
     @GetMapping
     public ResponseEntity<List<TopicResponseDTO>> getAllThemes() {
         List<TopicResponseDTO> themes = topicService.getAllTopics();
@@ -62,6 +82,12 @@ public class TopicController {
         return new ResponseEntity<>(themes, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a topic by its ID.
+     *
+     * @param id The ID of the topic to delete.
+     * @return ResponseEntity with an HTTP 200 OK status upon successful deletion.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteThemeById(@PathVariable String id) {
         topicService.deleteTheme(id);

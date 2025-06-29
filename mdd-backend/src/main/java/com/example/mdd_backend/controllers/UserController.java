@@ -24,6 +24,13 @@ public class UserController {
         this.userService = userService;
     }
 
+    /**
+     * Retrieves a user by their ID.
+     *
+     * @param id The ID of the user to retrieve.
+     * @return ResponseEntity containing the UserResponseDTO if found,
+     *         or an HTTP 404 Not Found status if the user does not exist.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDTO> getUserById(
         @PathVariable String id
@@ -36,12 +43,25 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves all users.
+     *
+     * @return ResponseEntity containing a list of UserResponseDTO if users exist,
+     *         or an empty list if no users are found.
+     */
     @GetMapping
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
         List<UserResponseDTO> users = userService.getAllUsers();
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves the current user's information.
+     *
+     * @param authentication the authentication object representing the user's authentication status
+     * @return ResponseEntity containing the UserResponseDTO if the user is authenticated,
+     *         or an HTTP 404 Not Found status if the user is not found.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> getCurrentUser(
         Authentication authentication
@@ -55,6 +75,13 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    /**
+     * Creates a new user.
+     *
+     * @param userDTO The DTO containing the user's information. Must be a valid object.
+     * @return ResponseEntity containing the created UserResponseDTO if successful,
+     *         or an HTTP 201 Created status.
+     */
     @PostMapping
     public ResponseEntity<UserResponseDTO> createUser(
         @Valid @RequestBody UserCreateRequestDTO userDTO
@@ -63,6 +90,12 @@ public class UserController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
+    /**
+     * Deletes a user by their ID.
+     *
+     * @param id The ID of the user to delete.
+     * @return ResponseEntity with an HTTP 200 OK status upon successful deletion.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUserById(@PathVariable String id) {
         userService.deleteUser(id);
@@ -70,6 +103,14 @@ public class UserController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    /**
+     * Subscribes the current user to a theme.
+     *
+     * @param themeId The ID of the theme to subscribe to.
+     * @param authentication The authentication object representing the user.
+     * @return ResponseEntity containing the updated UserResponseDTO if successful,
+     *         or an HTTP 201 Created status.
+     */
     @PostMapping("/{themeId}/subscriptions")
     public ResponseEntity<UserResponseDTO> subscribeToTheme(
         @PathVariable String themeId,
@@ -83,6 +124,14 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
+    /**
+     * Unsubscribes the current user from a theme.
+     *
+     * @param themeId The ID of the theme to unsubscribe from.
+     * @param authentication The authentication object representing the user.
+     * @return ResponseEntity containing the updated UserResponseDTO if successful,
+     *         or an HTTP 200 OK status.
+     */
     @DeleteMapping("/{themeId}/unsubscriptions")
     public ResponseEntity<UserResponseDTO> unsubscribeToTheme(
         @PathVariable String themeId,
@@ -96,6 +145,14 @@ public class UserController {
         return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
+    /**
+     * Updates a user by their ID.
+     *
+     * @param id The ID of the user to update.
+     * @param updateUserDTO The DTO containing the user's updated information.
+     * @return ResponseEntity containing the updated UserResponseDTO if successful,
+     *         or an HTTP 200 OK status.
+     */
     @PutMapping("/{id}")
     public ResponseEntity<UserResponseDTO> updateUser(
         @PathVariable String id,
@@ -105,6 +162,14 @@ public class UserController {
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
+    /**
+     * Updates the current user's information.
+     *
+     * @param updateUserDTO The DTO containing the user's updated information.
+     * @param authentication The authentication object representing the user.
+     * @return ResponseEntity containing the updated UserResponseDTO if successful,
+     *         or an HTTP 200 OK status.
+     */
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO> updateCurrentUser(
         @RequestBody UserUpdateRequestDTO updateUserDTO,
