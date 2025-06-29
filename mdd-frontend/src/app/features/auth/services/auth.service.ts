@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from "@angular/core";
 import { LoginRequest, LoginResponse } from "../../../core/models";
-import { catchError, tap } from "rxjs";
+import { catchError, of, tap } from "rxjs";
 
 import { HttpClient } from "@angular/common/http";
 import type { RegisterRequest } from "../../../core/models/register-request.interface";
@@ -58,5 +58,27 @@ export class AuthService {
 				throw error;
 			}),
 		);
+	}
+
+	checkAuthStatus() {
+		if (typeof window === "undefined") {
+			console.log("called in a non-browser environment");
+		}
+		const url = `${this.baseUrl}/me`;
+		console.log("sending request to : ", url);
+		console.log("Cookies:", document.cookie);
+		return this.http
+			.get<{ username: string }>(url, { withCredentials: true })
+			.pipe(
+				tap((response) => {
+					this.isLoggedIn.set(true);
+					this.currentUser.set(response.username);
+				}),
+				catchError((error) => {
+					this.isLoggedIn.set(false);
+					this.currentUser.set(null);
+					return [];
+				}),
+			);
 	}
 }
