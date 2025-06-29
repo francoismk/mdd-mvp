@@ -1,20 +1,22 @@
-import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
-import { NavbarComponent } from "./shared/components/navbar/navbar.component";
+import { Component, afterNextRender, effect, inject } from "@angular/core";
+
+import { AuthService } from "./features/auth/services/auth.service";
 import { CommonModule } from "@angular/common";
+import { NavbarComponent } from "./shared/components/navbar/navbar.component";
+import { RouterOutlet } from "@angular/router";
 
 @Component({
-  selector: "app-root",
-  standalone: true,
-  imports: [RouterOutlet, NavbarComponent, CommonModule],
-  template: `
+	selector: "app-root",
+	standalone: true,
+	imports: [RouterOutlet, NavbarComponent, CommonModule],
+	template: `
     <app-navbar></app-navbar>
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
     `,
-  styles: [
-    `
+	styles: [
+		`
     // .main-content {
     //   padding: 20px;
     //   max-width: 1200px;
@@ -22,8 +24,15 @@ import { CommonModule } from "@angular/common";
     //   width: 100%;
     // }
     `,
-  ],
+	],
 })
 export class AppComponent {
-  title = "mdd-frontend";
+	title = "mdd-frontend";
+	authService = inject(AuthService);
+
+	constructor() {
+		afterNextRender(() => {
+			this.authService.checkAuthStatus().subscribe();
+		});
+	}
 }

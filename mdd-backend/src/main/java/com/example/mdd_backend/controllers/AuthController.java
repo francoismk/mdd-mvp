@@ -3,12 +3,16 @@ package com.example.mdd_backend.controllers;
 import com.example.mdd_backend.dtos.AuthResponseDTO;
 import com.example.mdd_backend.dtos.LoginRequestDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
+import com.example.mdd_backend.dtos.UserResponseDTO;
 import com.example.mdd_backend.services.AuthService;
+import com.example.mdd_backend.services.UserService;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,9 +24,11 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, UserService userService) {
         this.authService = authService;
+        this.userService = userService;
     }
 
     @PostMapping("/register")
@@ -50,4 +56,13 @@ public class AuthController {
         authService.removeAuthCookie(response);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDTO> getCurrentUser(Authentication authentication) {
+    if (authentication == null || !authentication.isAuthenticated()) {
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+    UserResponseDTO userDTO = userService.getUserByEmail(authentication.getName());
+    return ResponseEntity.ok(userDTO);
+}
 }
