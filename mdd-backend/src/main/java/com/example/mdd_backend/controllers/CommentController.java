@@ -22,6 +22,15 @@ public class CommentController {
         this.commentService = commentService;
     }
 
+    /**
+     * Creates a new comment for a specific article.
+     *
+     * @param commentDTO The DTO containing the comment's information. Must be a valid object.
+     * @param articleId  The ID of the article to which the comment is associated.
+     * @param authentication The authentication object representing the user.
+     * @return ResponseEntity containing the created CommentResponseDTO if successful,
+     *         or an HTTP 400 Bad Request status if the commentDTO is null.
+     */
     @PostMapping
     public ResponseEntity<CommentResponseDTO> createComment(
         @Valid @RequestBody CommentCreateRequestDTO commentDTO,
@@ -40,6 +49,12 @@ public class CommentController {
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
     }
 
+    /**
+     * Retrieves all comments.
+     *
+     * @return ResponseEntity containing a list of CommentResponseDTO if comments exist,
+     *         or an HTTP 204 No Content status if no comments are found.
+     */
     @GetMapping
     public ResponseEntity<List<CommentResponseDTO>> getAllComments() {
         List<CommentResponseDTO> comments = commentService.getAllComments();
@@ -50,6 +65,13 @@ public class CommentController {
         return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 
+    /**
+     * Retrieves a comment by its ID.
+     *
+     * @param id The ID of the comment to retrieve.
+     * @return ResponseEntity containing the CommentResponseDTO if found,
+     *         or an HTTP 404 Not Found status if the comment does not exist.
+     */
     @GetMapping("/{id}")
     public ResponseEntity<CommentResponseDTO> getCommentById(
         @PathVariable String id
@@ -62,6 +84,12 @@ public class CommentController {
         return new ResponseEntity<>(comment, HttpStatus.OK);
     }
 
+    /**
+     * Deletes a comment by its ID.
+     *
+     * @param id The ID of the comment to delete.
+     * @return ResponseEntity with an HTTP 200 OK status upon successful deletion.
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCommentById(@PathVariable String id) {
         commentService.deleteComment(id);
