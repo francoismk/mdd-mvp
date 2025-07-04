@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongo:
     image: mongo:7
@@ -10,7 +8,10 @@ services:
     - mongo_data:/data/db
 
   backend:
-    image: mdd-backend
+    build:
+      context: ./mdd-backend
+      dockerfile: Dockerfile
+    container_name: mdd-backend
     depends_on:
       - mongo
     environment:
@@ -19,7 +20,9 @@ services:
     - "8080:8080"
 
   frontend:
-    image: mdd-frontend
+    build:
+      context: ./mdd-frontend
+      dockerfile: Dockerfile
     container_name: mdd-frontend
     depends_on:
       - backend

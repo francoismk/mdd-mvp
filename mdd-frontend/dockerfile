@@ -8,10 +8,12 @@ RUN npm install --legacy-peer-deps && npm cache clean --force
 
 COPY . .
 
-RUN npx ng build --configuration=production
+RUN npm run build --configuration=production
 
 FROM nginx:alpine
 
-COPY --from=build app/dist/mdd-frontend /usr/share/nginx/html
+COPY --from=build /app/dist/mdd-frontend/browser /usr/share/nginx/html
+
+RUN mv /usr/share/nginx/html/index.csr.html /usr/share/nginx/html/index.html
 
 EXPOSE 80
