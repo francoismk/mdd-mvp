@@ -1,9 +1,9 @@
 import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { Injectable, inject } from "@angular/core";
 
-import { Article } from "../../../core/models";
-import { CreateArticle } from "../../../core/models/create-article.interface";
-import { Observable } from "rxjs";
+import type { Article } from "../../../core/models";
+import type { CreateArticle } from "../../../core/models/create-article.interface";
+import type { Observable } from "rxjs";
 
 // Récupération des articles via httpClient ici ?
 @Injectable({ providedIn: "root" })
@@ -41,7 +41,6 @@ export class ArticleService {
 
 	createArticle(article: CreateArticle): Observable<CreateArticle> {
 		const url = `${this.baseUrl}/articles`;
-		console.log("========= from front======== ", article);
 		return this.http.post<CreateArticle>(url, article, {
 			headers: this.headers,
 			withCredentials: true,

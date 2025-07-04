@@ -1,14 +1,15 @@
-import {Component, inject} from '@angular/core';
-import { ArticleService } from '../services/articles.service';
-import {FormBuilder, ReactiveFormsModule, Validators} from '@angular/forms';
-import { TopicService } from '../../topics/services/topics.service';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { RouterLink } from '@angular/router';
+import { Component, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+
+import { ArticleService } from "../services/articles.service";
+import { RouterLink } from "@angular/router";
+import { TopicService } from "../../topics/services/topics.service";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: 'app-article-form',
-  standalone: true,
-  template: `
+	selector: "app-article-form",
+	standalone: true,
+	template: `
     <div class="header">
       <a routerLink="/articles" class="back-button">
         <img src="/assets/images/back-icon.svg" alt="Arrow Left" class="back-icon">
@@ -26,7 +27,7 @@ import { RouterLink } from '@angular/router';
       </select>
       @if (createArticleForm.get('topicId')?.errors?.['required'] && createArticleForm.get('topicId')?.touched) {
         <div class="error-message">Le thème est requis</div>
-      }   
+      }
     </div>
 
     <div class="form-group">
@@ -48,7 +49,8 @@ import { RouterLink } from '@angular/router';
     >Créer</button>
   </form>
   `,
-  styles: [`
+	styles: [
+		`
     :host {
       display: block;
       max-width: 600px;
@@ -185,42 +187,38 @@ import { RouterLink } from '@angular/router';
     .placeholder {
       color: #999;
     }
-  `],
-  imports: [
-    ReactiveFormsModule,
-    RouterLink
-  ]
+  `,
+	],
+	imports: [ReactiveFormsModule, RouterLink],
 })
 export class ArticleFormComponent {
+	private formBuilder = inject(FormBuilder);
+	private articleService = inject(ArticleService);
+	private topicService = inject(TopicService);
+	topics = toSignal(this.topicService.getTopics(), { initialValue: [] });
 
-  private formBuilder = inject(FormBuilder);
-  private articleService = inject(ArticleService);
-  private topicService = inject(TopicService);
-  topics = toSignal(this.topicService.getTopics(), { initialValue: [] });
+	createArticleForm = this.formBuilder.nonNullable.group({
+		title: ["", [Validators.required]],
+		content: ["", [Validators.required]],
+		topicId: ["", [Validators.required]],
+	});
 
-  createArticleForm = this.formBuilder.nonNullable.group({
-    title: ["", [Validators.required]],
-    content: ["", [Validators.required]],
-    topicId: ["", [Validators.required]],
-  })
-
-  onSubmit() {
-    console.log("test de l'envoi du formulaire");
-    console.log(this.createArticleForm.value);
-    if (this.createArticleForm.valid) {
-      const payload = this.createArticleForm.getRawValue();
-      this.articleService.createArticle(payload).subscribe({
-        next: (response) => {
-          console.log('Article created successfully:', response);
-          // Reset the form after successful submission
-          this.createArticleForm.reset();
-        },
-        error: (error) => {
-          console.error('Error creating article:', error);
-        }
-      });
-    } else {
-      console.error('Form is invalid:', this.createArticleForm.errors);
-    }
-  }
+	onSubmit() {
+		("test de l'envoi du formulaire");
+		this.createArticleForm.value;
+		if (this.createArticleForm.valid) {
+			const payload = this.createArticleForm.getRawValue();
+			this.articleService.createArticle(payload).subscribe({
+				next: (response) => {
+					// Reset the form after successful submission
+					this.createArticleForm.reset();
+				},
+				error: (error) => {
+					console.error("Error creating article:", error);
+				},
+			});
+		} else {
+			console.error("Form is invalid:", this.createArticleForm.errors);
+		}
+	}
 }

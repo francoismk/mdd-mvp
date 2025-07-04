@@ -1,6 +1,6 @@
 import { Component, effect, inject, signal } from "@angular/core";
 
-import { Article } from "../../../core/models";
+import type { Article } from "../../../core/models";
 import { ArticleService } from "../services/articles.service";
 import { CommonModule } from "@angular/common";
 import { Router } from "@angular/router";
@@ -155,9 +155,7 @@ export class ArticleListComponent {
 
 	constructor() {
 		this.loadArticles("asc");
-		effect(() => {
-			console.log("articles received :", this.articles());
-		});
+		effect(() => {});
 	}
 
 	private loadArticles(order: "asc" | "desc") {

@@ -1,14 +1,15 @@
 import { Component, effect, inject } from "@angular/core";
-import { UserService } from "../services/user.service";
 import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
-import { toSignal } from "@angular/core/rxjs-interop";
+
 import type { UserRequestUpdate } from "../../../core/models";
+import { UserService } from "../services/user.service";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: "app-user-profile",
-  standalone: true,
-  imports: [ReactiveFormsModule],
-  template: `
+	selector: "app-user-profile",
+	standalone: true,
+	imports: [ReactiveFormsModule],
+	template: `
     <div class="profile-container">
       <div class="profile-header">
         <h2>Profil utilisateur</h2>
@@ -34,7 +35,8 @@ import type { UserRequestUpdate } from "../../../core/models";
       </div>
     </div>
   `,
-  styles: [`
+	styles: [
+		`
     .profile-container {
       width: 100%;
       padding: 2rem 4rem;
@@ -160,47 +162,47 @@ import type { UserRequestUpdate } from "../../../core/models";
         width: 100%;
       }
     }
-  `]
+  `,
+	],
 })
 export class UserProfileComponent {
-  private userService = inject(UserService);
-  private formBuilder = inject(FormBuilder);
-  user = toSignal(this.userService.getUser(), { initialValue: null });
+	private userService = inject(UserService);
+	private formBuilder = inject(FormBuilder);
+	user = toSignal(this.userService.getUser(), { initialValue: null });
 
-  userProfileForm = this.formBuilder.nonNullable.group({
-    username: "",
-    email: "",
-    password: "",
-  });
+	userProfileForm = this.formBuilder.nonNullable.group({
+		username: "",
+		email: "",
+		password: "",
+	});
 
-  constructor() {
-    effect(() => {
-    console.log("user profile component");
-      console.log("user profile: ", this.user());
-      this.userProfileForm.patchValue({
-        username: this.user()?.username,
-        email: this.user()?.email,
-      });
-    });
-  }
+	constructor() {
+		effect(() => {
+			this.userProfileForm.patchValue({
+				username: this.user()?.username,
+				email: this.user()?.email,
+			});
+		});
+	}
 
-  unsubscribe(subscriptionId: string) {
-    this.userService.unsubscribe(subscriptionId).subscribe({
-      next: () => {
-          const user = this.user();
-          if (user) {
-              user.subscriptions = user.subscriptions.filter(subscription => subscription.id !== subscriptionId);
-              console.log("Unsubscribed from topic");
-            }
-      }
-    });
-  }
+	unsubscribe(subscriptionId: string) {
+		this.userService.unsubscribe(subscriptionId).subscribe({
+			next: () => {
+				const user = this.user();
+				if (user) {
+					user.subscriptions = user.subscriptions.filter(
+						(subscription) => subscription.id !== subscriptionId,
+					);
+				}
+			},
+		});
+	}
 
-  updateUser(user: UserRequestUpdate) {
-    this.userService.updateUser(user).subscribe({
-      next: () => {
-        console.log("User updated");
-      }
-    });
-  }
+	updateUser(user: UserRequestUpdate) {
+		this.userService.updateUser(user).subscribe({
+			next: () => {
+				console.log("User updated");
+			},
+		});
+	}
 }

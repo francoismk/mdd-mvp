@@ -1,18 +1,19 @@
 import { Component, computed, effect, inject } from "@angular/core";
-import { ArticleService } from "../services/articles.service";
-import { toSignal } from "@angular/core/rxjs-interop";
-import { ActivatedRoute } from "@angular/router";
-import { of } from "rxjs";
-import type { ArticleComment } from "../../../core/models";
 import { FormBuilder, ReactiveFormsModule } from "@angular/forms";
+
+import { ActivatedRoute } from "@angular/router";
+import type { ArticleComment } from "../../../core/models";
+import { ArticleService } from "../services/articles.service";
 import { CommentService } from "../../comments/services/comments.service";
 import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
+import { of } from "rxjs";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: "app-article-by-id",
-  standalone: true,
-  template: `
+	selector: "app-article-by-id",
+	standalone: true,
+	template: `
     <div class="article-container">
       <div class="article-header">
         <a routerLink="/articles" class="back-button">
@@ -61,7 +62,7 @@ import { RouterModule } from "@angular/router";
       </div>
     </div>
   `,
-  styles: `
+	styles: `
     .article-container {
       max-width: 100%;
       margin: 0 auto;
@@ -255,62 +256,50 @@ import { RouterModule } from "@angular/router";
       }
     }
     `,
-  imports: [
-    ReactiveFormsModule,
-    CommonModule,
-    RouterModule
-  ]
+	imports: [ReactiveFormsModule, CommonModule, RouterModule],
 })
 export class ArticleByIdComponent {
-  private articleService = inject(ArticleService);
-  private route = inject(ActivatedRoute);
-  private articleId = this.route.snapshot.paramMap.get("id");
-  article = toSignal(
-    this.articleId
-      ? this.articleService.getArticlesById(this.articleId)
-      : of(null),
-    { initialValue: null },
-  );
-  readonly articleComments = computed(
-    (): ArticleComment[] => this.article()?.comments ?? [],
-  );
-  private formBuilder = inject(FormBuilder);
-  private commentService = inject(CommentService);
+	private articleService = inject(ArticleService);
+	private route = inject(ActivatedRoute);
+	private articleId = this.route.snapshot.paramMap.get("id");
+	article = toSignal(
+		this.articleId
+			? this.articleService.getArticlesById(this.articleId)
+			: of(null),
+		{ initialValue: null },
+	);
+	readonly articleComments = computed(
+		(): ArticleComment[] => this.article()?.comments ?? [],
+	);
+	private formBuilder = inject(FormBuilder);
+	private commentService = inject(CommentService);
 
-  createCommentForm = this.formBuilder.nonNullable.group({
-    content: "",
-  });
+	createCommentForm = this.formBuilder.nonNullable.group({
+		content: "",
+	});
 
-  onSubmit() {
-    console.log("test de l'envoi du formulaire");
-    console.log(this.createCommentForm.value);
-    if (this.createCommentForm.valid && this.articleId) {
-      const payload = this.createCommentForm.getRawValue();
-      this.commentService.createComment(payload, this.articleId).subscribe({
-        next: (response) => {
-          console.log('Comment created successfully:', response);
-          const article = this.article();
-          if (article?.comments) {
-            article.comments.push(response);
-          }
-          this.createCommentForm.reset();
-        },
-        error: (error) => {
-          console.error('Error creating comment:', error);
-        }
-      });
-    }
-    else {
-      console.error('Form is invalid:', this.createCommentForm.errors);
-    }
-  }
+	onSubmit() {
+		this.createCommentForm.value;
+		if (this.createCommentForm.valid && this.articleId) {
+			const payload = this.createCommentForm.getRawValue();
+			this.commentService.createComment(payload, this.articleId).subscribe({
+				next: (response) => {
+					const article = this.article();
+					if (article?.comments) {
+						article.comments.push(response);
+					}
+					this.createCommentForm.reset();
+				},
+				error: (error) => {
+					console.error("Error creating comment:", error);
+				},
+			});
+		} else {
+			console.error("Form is invalid:", this.createCommentForm.errors);
+		}
+	}
 
-  constructor() {
-    effect(() => {
-      console.log("reception de l'article suivant : ", this.article());
-      console.log("reception de l'id ????", this.articleId);
-      console.log("petit test des commentaires", this.article()?.comments);
-      console.log("test de computed", this.articleComments());
-    });
-  }
+	constructor() {
+		effect(() => {});
+	}
 }

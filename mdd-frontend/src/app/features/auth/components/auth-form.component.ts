@@ -1,14 +1,15 @@
-import {Component, inject} from '@angular/core';
-import {FormBuilder, ReactiveFormsModule, Validators,} from '@angular/forms';
-import {AuthService} from '../services/auth.service';
-import type {LoginRequest} from '../../../core/models';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Component, inject } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+
+import { AuthService } from "../services/auth.service";
+import { CommonModule } from "@angular/common";
+import type { LoginRequest } from "../../../core/models";
+import { RouterModule } from "@angular/router";
 
 @Component({
-  selector: 'auth-login-form',
-  standalone: true,
-  template: `
+	selector: "auth-login-form",
+	standalone: true,
+	template: `
   <div class="auth-container">
     <div class="back-button">
       <a routerLink="/">
@@ -23,7 +24,7 @@ import { RouterModule } from '@angular/router';
       <input id="usernameOrEmail" type="text" formControlName="usernameOrEmail">
       @if (usernameOrEmail?.errors?.['required'] && usernameOrEmail?.touched) {
                     <div class="error-message">Le nom d'utilisateur est requis</div>
-                } 
+                }
       </div>
 
       <div class="form-group">
@@ -41,7 +42,7 @@ import { RouterModule } from '@angular/router';
     </div>
   </div>
     `,
-    styles: `
+	styles: `
     .auth-container {
       display: flex;
       flex-direction: column;
@@ -155,51 +156,41 @@ import { RouterModule } from '@angular/router';
     }
   }
     `,
-  imports: [
-    ReactiveFormsModule,
-    CommonModule,
-    RouterModule
-  ]
+	imports: [ReactiveFormsModule, CommonModule, RouterModule],
 })
 export class AuthFormComponent {
+	private formBuilder = inject(FormBuilder);
+	private authService = inject(AuthService);
 
-  private formBuilder = inject(FormBuilder);
-  private authService = inject(AuthService);
+	authLoginForm = this.formBuilder.nonNullable.group({
+		usernameOrEmail: ["", [Validators.required]],
+		password: ["", [Validators.required]],
+	});
 
-  authLoginForm = this.formBuilder.nonNullable.group({
-    usernameOrEmail: ["", [Validators.required]],
-    password: ["", [Validators.required]],
-  })
+	onSubmit() {
+		("test de l'envoi du formulaire");
+		this.authLoginForm.value;
+		if (this.authLoginForm.valid) {
+			const payload: LoginRequest = this.authLoginForm.getRawValue();
+			this.authService.login(payload).subscribe({
+				next: (response) => {
+					// Reset the form after successful submission
+					this.authLoginForm.reset();
+				},
+				error: (error) => {
+					console.error("Error creating article:", error);
+				},
+			});
+		} else {
+			console.error("Form is invalid:", this.authLoginForm.errors);
+		}
+	}
 
-  onSubmit() {
-    console.log("test de l'envoi du formulaire");
-    console.log(this.authLoginForm.value);
-    if (this.authLoginForm.valid) {
-      const payload: LoginRequest = this.authLoginForm.getRawValue();
-      this.authService.login(payload).subscribe({
-        next: (response) => {
-          console.log('Article created successfully:', response);
-          // Reset the form after successful submission
-          this.authLoginForm.reset();
-        },
-        error: (error) => {
-          console.error('Error creating article:', error);
-        }
-      });
-    } else {
-      console.error('Form is invalid:', this.authLoginForm.errors);
-    }
-  }
+	get usernameOrEmail() {
+		return this.authLoginForm.get("usernameOrEmail");
+	}
 
-  get usernameOrEmail() {
-    return this.authLoginForm.get("usernameOrEmail");
-  }
-
-  get password() {
-    return this.authLoginForm.get("password");
-  } 
+	get password() {
+		return this.authLoginForm.get("password");
+	}
 }
-
-
-
-
