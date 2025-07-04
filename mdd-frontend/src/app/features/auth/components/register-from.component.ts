@@ -1,14 +1,20 @@
-import { Component, inject } from "@angular/core";
-import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-import { CommonModule } from "@angular/common";
+import {
+	AbstractControl,
+	FormBuilder,
+	ReactiveFormsModule,
+	Validators,
+} from "@angular/forms";
+import { Component, inject, signal } from "@angular/core";
+
 import { AuthService } from "../services/auth.service";
+import { CommonModule } from "@angular/common";
 import { RouterModule } from "@angular/router";
 
 @Component({
-    selector: 'app-register-form',
-    standalone: true,
-    imports: [ReactiveFormsModule, CommonModule, RouterModule],
-    template: `
+	selector: "app-register-form",
+	standalone: true,
+	imports: [ReactiveFormsModule, CommonModule, RouterModule],
+	template: `
     <div class="auth-container">
         <div class="back-button">
         <a routerLink="/">
@@ -32,9 +38,9 @@ import { RouterModule } from "@angular/router";
                 </div>
             }
             </div>
-            
+
             <div class="form-group">
-            <label for="username">Username </label>
+            <label for="username">Nom d'utilisateur</label>
             <input id="username" type="text" formControlName="username">
             @if (username?.errors?.['required'] && username?.touched) {
                     <div class="error-message">Le nom d'utilisateur est requis</div>
@@ -44,7 +50,7 @@ import { RouterModule } from "@angular/router";
                 }
             </div>
             <div class="form-group">
-            <label for="password">Password </label>
+            <label for="password">Mot de passe</label>
             <input id="password" type="password" formControlName="password">
              @if (password?.errors?.['required'] && password?.touched) {
                     <div class="error-message">Le mot de passe est requis</div>
@@ -54,8 +60,12 @@ import { RouterModule } from "@angular/router";
                       Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial
                   </div>
               }
+
             </div>
 
+            @if(backendError()) {
+                  <div class="error-message">{{ backendError() }}</div>
+                }
             <button type="submit" [disabled]="registerForm.invalid"
             [title]="registerForm.invalid ? 'Formulaire invalide' : 'Créer un compte'"
             >Créer un compte</button>
@@ -63,7 +73,7 @@ import { RouterModule } from "@angular/router";
     </div>
     </div>
         `,
-        styles: `
+	styles: `
             .auth-container {
       display: flex;
       flex-direction: column;
@@ -183,61 +193,71 @@ import { RouterModule } from "@angular/router";
         `,
 })
 export class RegisterFormComponent {
-    private formBuilder = inject(FormBuilder);
-    private authService = inject(AuthService);
+	private formBuilder = inject(FormBuilder);
+	private authService = inject(AuthService);
 
-    registerForm = this.formBuilder.group({
-        username: ["", [Validators.required, Validators.minLength(3)]],
-        email: ["", [Validators.required, Validators.email]],
-        password: ["", [Validators.required, 
-            Validators.minLength(8), 
-            this.validatePassword]],
-    })
+	registerForm = this.formBuilder.group({
+		username: ["", [Validators.required, Validators.minLength(3)]],
+		email: ["", [Validators.required, Validators.email]],
+		password: [
+			"",
+			[Validators.required, Validators.minLength(8), this.validatePassword],
+		],
+	});
 
-    onSubmit() {
-        console.log("test de l'envoi du formulaire");
-        console.log(this.registerForm.value);
-        if(this.registerForm.valid) {
-            console.log("formulaire valide");
-            const {username, email, password} = this.registerForm.value;
-            if(username && email && password) {
-                console.log("username, email, password from 2eme if", username, email, password);
-                this.authService.register({username, email, password}).subscribe({
-                    next: (response) => {
-                        console.log(response);
-                    },
-                    error: (error) => {
-                        console.error(error);
-                    }
-                })
-            }
-        }
-    }
+	backendError = signal<string | null>(null);
 
-    private validatePassword(control: AbstractControl) {
-      const value = control.value;
-      if (!value) return null;
-      
-      if (value.length < 8) return { minlength: true };
-      
-      const hasNumber = /[0-9]/.test(value);
-      const hasLower = /[a-z]/.test(value);
-      const hasUpper = /[A-Z]/.test(value);
-      const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-      
-      const valid = hasNumber && hasLower && hasUpper && hasSpecial;
-      return valid ? null : { pattern: true };
-    }
+	onSubmit() {
+		console.log("test de l'envoi du formulaire");
+		console.log(this.registerForm.value);
+		if (this.registerForm.valid) {
+			console.log("formulaire valide");
+			const { username, email, password } = this.registerForm.value;
+			if (username && email && password) {
+				console.log(
+					"username, email, password from 2eme if",
+					username,
+					email,
+					password,
+				);
+				this.authService.register({ username, email, password }).subscribe({
+					next: (response) => {
+						console.log(response);
+					},
+					error: (error) => {
+						console.log("lerreur qui vient du front ? ");
+						console.error(error.error.message);
+						this.backendError.set(error.error.message);
+					},
+				});
+			}
+		}
+	}
 
-    get username() {
-        return this.registerForm.get("username");
-    }
+	private validatePassword(control: AbstractControl) {
+		const value = control.value;
+		if (!value) return null;
 
-    get email() {
-        return this.registerForm.get("email");
-    }
+		if (value.length < 8) return { minlength: true };
 
-    get password() {
-        return this.registerForm.get("password");
-    }
+		const hasNumber = /[0-9]/.test(value);
+		const hasLower = /[a-z]/.test(value);
+		const hasUpper = /[A-Z]/.test(value);
+		const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+
+		const valid = hasNumber && hasLower && hasUpper && hasSpecial;
+		return valid ? null : { pattern: true };
+	}
+
+	get username() {
+		return this.registerForm.get("username");
+	}
+
+	get email() {
+		return this.registerForm.get("email");
+	}
+
+	get password() {
+		return this.registerForm.get("password");
+	}
 }

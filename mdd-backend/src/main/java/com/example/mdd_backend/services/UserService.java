@@ -73,7 +73,7 @@ public class UserService {
                 userDTO.getEmail()
             );
             throw new DuplicateResourceException(
-                "User with this email or username already exists"
+                "Cet email ou ce nom d'utilisateur existe déjà"
             );
         } catch (Exception e) {
             logger.error("Error creating user: {}", e.getMessage(), e);
@@ -471,5 +471,13 @@ public class UserService {
             logger.error("Error building user DTO: {}", e.getMessage(), e);
             throw new BusinessLogicException("Failed to map user data");
         }
+    }
+
+    public boolean existsByEmail(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 }
