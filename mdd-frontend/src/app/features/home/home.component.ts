@@ -1,12 +1,12 @@
+import { CommonModule } from "@angular/common";
 import { Component } from "@angular/core";
 import { RouterModule } from "@angular/router";
-import { CommonModule } from "@angular/common";
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+	selector: "app-home",
+	standalone: true,
+	imports: [CommonModule, RouterModule],
+	template: `
     <div class="main-container">
         <img src="assets/images/logo.svg" alt="MDD Logo" class="logo-img">
         <div class="auth-buttons">
@@ -15,7 +15,7 @@ import { CommonModule } from "@angular/common";
         </div>
     </div>
   `,
-  styles: `
+	styles: `
     .main-container {
         display: flex;
         flex-direction: column;
@@ -61,8 +61,7 @@ import { CommonModule } from "@angular/common";
     .btn {
         width: 100%;
     }
+  }
     `,
 })
-export class HomeComponent {
-    constructor() {}
-}
+export class HomeComponent {}

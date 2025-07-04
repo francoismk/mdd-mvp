@@ -17,12 +17,6 @@ import { RouterOutlet } from "@angular/router";
     `,
 	styles: [
 		`
-    // .main-content {
-    //   padding: 20px;
-    //   max-width: 1200px;
-    //   margin: 0 auto;
-    //   width: 100%;
-    // }
     `,
 	],
 })
