@@ -87,19 +87,29 @@ public class AuthService {
         try {
             userService.createUser(userDTO);
             return jwtService.getTokenFromUserIdentifier(userDTO.getEmail());
-        } catch (DuplicateKeyException e) {
-            logger.warn(
-                "Registration failed: User with email {} already exists",
-                userDTO.getEmail()
-            );
-            throw new DuplicateResourceException("Registration failed: ");
+        } catch (DuplicateResourceException e) {
+        logger.warn("Registration failed: {}", e.getMessage());
+        throw e;
+        }   
+        catch (DuplicateKeyException e) {
+            String errorMessage = e.getMessage();
+            String userMessage = "Un compte existe déjà avec ces informations.";
+            if (errorMessage != null) {
+                if (errorMessage.contains("email")) {
+                    userMessage = "Un compte existe déjà avec cet email.";
+                } else if (errorMessage.contains("username")) {
+                    userMessage = "Ce nom d'utilisateur est déjà pris.";
+                }
+            }
+            logger.warn("Registration failed: {}", userMessage);
+            throw new DuplicateResourceException(userMessage);
         } catch (Exception e) {
             logger.error(
                 "Registration failed for user: {}",
                 userDTO.getEmail(),
                 e
             );
-            throw new AuthenticationException("Registration failed: ");
+            throw new AuthenticationException("Register failed");
         }
     }
 

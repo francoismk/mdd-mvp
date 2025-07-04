@@ -49,8 +49,8 @@ public class CustomUserDetailsService implements UserDetailsService {
         try {
             DBUser user = userRepository.findByEmail(usernameOrEmail).orElse(null);
 
-            if(user == null) {
-                user = userRepository.findByUsername(usernameOrEmail);
+            if (user == null) {
+                user = userRepository.findByUsername(usernameOrEmail).orElse(null);
             }
 
             return user;
