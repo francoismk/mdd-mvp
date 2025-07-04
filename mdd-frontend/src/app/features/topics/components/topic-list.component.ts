@@ -1,12 +1,13 @@
 import { Component, inject, signal } from "@angular/core";
+
 import { TopicService } from "../services/topics.service";
-import { toSignal } from "@angular/core/rxjs-interop";
 import { UserService } from "../../user-profile/services/user.service";
+import { toSignal } from "@angular/core/rxjs-interop";
 
 @Component({
-  selector: "app-topic-list",
-  standalone: true,
-  template: `
+	selector: "app-topic-list",
+	standalone: true,
+	template: `
     <div class="topics-container">
       <div class="topics-grid">
         @for (topic of topics(); track topic.id) {
@@ -29,7 +30,7 @@ import { UserService } from "../../user-profile/services/user.service";
       </div>
     </div>
   `,
-  styles: `
+	styles: `
     .topics-container {
       width: 100%;
       padding: 2rem 4rem;
@@ -122,30 +123,29 @@ import { UserService } from "../../user-profile/services/user.service";
   `,
 })
 export class TopicListComponent {
-  private topicService = inject(TopicService);
-  private userService = inject(UserService);
-  topics = toSignal(this.topicService.getTopics(), {
-    initialValue: [],
-  });
-  user = toSignal(this.userService.getUser(), {
-    initialValue: null,
-  });
+	private topicService = inject(TopicService);
+	private userService = inject(UserService);
+	topics = toSignal(this.topicService.getTopics(), {
+		initialValue: [],
+	});
+	user = toSignal(this.userService.getUser(), {
+		initialValue: null,
+	});
 
-  subcribedTopics = signal<string[]>([]);
+	subcribedTopics = signal<string[]>([]);
 
-  subscribe(topicId: string) {
-    this.topicService.subscribe(topicId).subscribe({
-      next: () => {
-        console.log("Subscribed to topic");
-        this.subcribedTopics.update((topics) => [...topics, topicId]);
-      },
-    });
-  }
+	subscribe(topicId: string) {
+		this.topicService.subscribe(topicId).subscribe({
+			next: () => {
+				this.subcribedTopics.update((topics) => [...topics, topicId]);
+			},
+		});
+	}
 
-  isSubscribed(topicId: string): boolean {
-    if (this.subcribedTopics().includes(topicId)) {
-      return true;
-    }
-    return !!this.user()?.subscriptions?.some((sub) => sub.id === topicId);
-  }
+	isSubscribed(topicId: string): boolean {
+		if (this.subcribedTopics().includes(topicId)) {
+			return true;
+		}
+		return !!this.user()?.subscriptions?.some((sub) => sub.id === topicId);
+	}
 }

@@ -19,8 +19,6 @@ export class AuthService {
 			tap((response) => {
 				this.isLoggedIn.set(true);
 				this.currentUser.set(loginRequest.usernameOrEmail);
-				console.log(response);
-				console.log("User logged in:", this.currentUser());
 			}),
 			catchError((error) => {
 				console.error("Login failed:", error);
@@ -33,7 +31,6 @@ export class AuthService {
 
 	register(registerRequest: RegisterRequest) {
 		const url = `${this.baseUrl}/register`;
-		console.log("je passe dans le service register", registerRequest);
 		return this.http.post(url, registerRequest, { withCredentials: true }).pipe(
 			tap((response) => {
 				console.log(response);
@@ -49,7 +46,6 @@ export class AuthService {
 		const url = `${this.baseUrl}/logout`;
 		return this.http.post(url, null, { withCredentials: true }).pipe(
 			tap(() => {
-				console.log("logout");
 				this.isLoggedIn.set(false);
 				this.currentUser.set(null);
 			}),
@@ -62,11 +58,8 @@ export class AuthService {
 
 	checkAuthStatus() {
 		if (typeof window === "undefined") {
-			console.log("called in a non-browser environment");
 		}
 		const url = `${this.baseUrl}/me`;
-		console.log("sending request to : ", url);
-		console.log("Cookies:", document.cookie);
 		return this.http
 			.get<{ username: string }>(url, { withCredentials: true })
 			.pipe(

@@ -1,5 +1,5 @@
 import {
-	AbstractControl,
+	type AbstractControl,
 	FormBuilder,
 	ReactiveFormsModule,
 	Validators,
@@ -208,24 +208,12 @@ export class RegisterFormComponent {
 	backendError = signal<string | null>(null);
 
 	onSubmit() {
-		console.log("test de l'envoi du formulaire");
-		console.log(this.registerForm.value);
 		if (this.registerForm.valid) {
-			console.log("formulaire valide");
 			const { username, email, password } = this.registerForm.value;
 			if (username && email && password) {
-				console.log(
-					"username, email, password from 2eme if",
-					username,
-					email,
-					password,
-				);
 				this.authService.register({ username, email, password }).subscribe({
-					next: (response) => {
-						console.log(response);
-					},
+					next: (response) => {},
 					error: (error) => {
-						console.log("lerreur qui vient du front ? ");
 						console.error(error.error.message);
 						this.backendError.set(error.error.message);
 					},
