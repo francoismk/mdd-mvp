@@ -1,4 +1,4 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 
 import { AuthService } from "../services/auth.service";
@@ -34,7 +34,9 @@ import { RouterModule } from "@angular/router";
                     <div class="error-message">Le mot de passe est requis</div>
                 }
       </div>
-
+      @if (backendError()) {
+        <div class="error-message">{{ backendError() }}</div>
+      }
       <button type="submit" [disabled]="authLoginForm.invalid"
       [title]="authLoginForm.invalid ? 'Formulaire invalide' : 'Se connecter'"
       >Se connecter</button>
@@ -167,6 +169,8 @@ export class AuthFormComponent {
 		password: ["", [Validators.required]],
 	});
 
+  backendError = signal<string | null>(null);
+
 	onSubmit() {
 		("test de l'envoi du formulaire");
 		this.authLoginForm.value;
@@ -179,6 +183,7 @@ export class AuthFormComponent {
 				},
 				error: (error) => {
 					console.error("Error creating article:", error);
+					this.backendError.set(error.error.message);
 				},
 			});
 		} else {

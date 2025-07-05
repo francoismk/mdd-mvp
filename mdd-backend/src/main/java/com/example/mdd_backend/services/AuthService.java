@@ -67,7 +67,7 @@ public class AuthService {
                 "Authentication failed for user: {}",
                 loginRequestDTO.getUsernameOrEmail()
             );
-            throw new AuthenticationException("Invalid credentials");
+            throw new AuthenticationException("Adresse email/nom d'utilisateur et/ou mot de passe incorrect");
         }
     }
 
