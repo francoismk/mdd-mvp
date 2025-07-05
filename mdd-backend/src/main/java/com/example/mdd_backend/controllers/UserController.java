@@ -1,11 +1,15 @@
 package com.example.mdd_backend.controllers;
 
+import com.example.mdd_backend.dtos.AuthResponseDTO;
 import com.example.mdd_backend.dtos.UserCreateRequestDTO;
 import com.example.mdd_backend.dtos.UserResponseDTO;
 import com.example.mdd_backend.dtos.UserUpdateRequestDTO;
+import com.example.mdd_backend.services.AuthService;
+import com.example.mdd_backend.services.JWTService;
 import com.example.mdd_backend.services.UserService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -19,9 +23,13 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final AuthService authService;
+    private final JWTService jwtService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthService authService, JWTService jwtService) {
         this.userService = userService;
+        this.authService = authService;
+        this.jwtService = jwtService;
     }
 
     /**
@@ -167,16 +175,23 @@ public class UserController {
      *
      * @param updateUserDTO The DTO containing the user's updated information.
      * @param authentication The authentication object representing the user.
+     * @param response The HTTP servlet response for updating the auth cookie.
      * @return ResponseEntity containing the updated UserResponseDTO if successful,
      *         or an HTTP 200 OK status.
      */
     @PutMapping("/me")
     public ResponseEntity<UserResponseDTO> updateCurrentUser(
         @RequestBody UserUpdateRequestDTO updateUserDTO,
-        Authentication authentication
+        Authentication authentication,
+        HttpServletResponse response
     ) {
-        String userEmail = authentication.getName();
-        UserResponseDTO updatedUser = userService.updateUserByUsername(userEmail, updateUserDTO);
+        String currentUserEmail = authentication.getName();
+        UserResponseDTO updatedUser = userService.updateUserByEmail(currentUserEmail, updateUserDTO);
+        
+        String newUserIdentifier = updateUserDTO.getEmail() != null ? updateUserDTO.getEmail() : currentUserEmail;
+        AuthResponseDTO newToken = jwtService.getTokenFromUserIdentifier(newUserIdentifier);
+        authService.addAuthCookie(newToken, response);
+        
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 
