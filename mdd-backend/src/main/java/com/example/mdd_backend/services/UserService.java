@@ -62,11 +62,33 @@ public class UserService {
      */
     public UserResponseDTO createUser(UserCreateRequestDTO userDTO) {
         try {
+            if (userRepository.findByEmail(userDTO.getEmail()).isPresent()) {
+                logger.warn(
+                    "User creation failed: Email already exists: {}",
+                    userDTO.getEmail()
+                );
+                throw new DuplicateResourceException(
+                    "Cet email existe déjà"
+                );
+            }
+            
+            if (userRepository.findByUsername(userDTO.getUsername()).isPresent()) {
+                logger.warn(
+                    "User creation failed: Username already exists: {}",
+                    userDTO.getUsername()
+                );
+                throw new DuplicateResourceException(
+                    "Ce nom d'utilisateur existe déjà"
+                );
+            }
+            
             DBUser user = modelMapper.map(userDTO, DBUser.class);
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             DBUser savedUser = userRepository.save(user);
             return modelMapper.map(savedUser, UserResponseDTO.class);
+        } catch (DuplicateResourceException e) {
+            throw e;
         } catch (DuplicateKeyException e) {
             logger.warn(
                 "User creation failed: Email or username already exists: {}",
@@ -338,10 +360,16 @@ public class UserService {
             }
 
             if (updateUserDTO.getUsername() != null) {
+                Optional<DBUser> existingUserWithUsername = userRepository.findByUsername(updateUserDTO.getUsername());
+                if (existingUserWithUsername.isPresent() && !existingUserWithUsername.get().getId().equals(user.getId())) {
+                    throw new DuplicateResourceException(
+                            "Ce nom d'utilisateur existe déjà"
+                    );
+                }
                 user.setUsername(updateUserDTO.getUsername());
             }
 
-            if (updateUserDTO.getPassword() != null) {
+            if (updateUserDTO.getPassword() != null && !updateUserDTO.getPassword().isEmpty()) {
                 user.setPassword(
                     passwordEncoder.encode(updateUserDTO.getPassword())
                 );
@@ -360,16 +388,16 @@ public class UserService {
     /**
      * Updates user information.
      *
-     * Validates email uniqueness before updating.
+     * Validates email and username uniqueness before updating.
      *
-     * @param userEmail username of the user to update
+     * @param userEmail email of the user to update
      * @param updateUserDTO Updated user data
      * @return Updated user information
      * @throws ResourceNotFoundException If user doesn't exist
-     * @throws DuplicateResourceException If new email already exists
+     * @throws DuplicateResourceException If new email or username already exists
      * @throws DatabaseOperationException On update failure
      */
-    public UserResponseDTO updateUserByUsername(
+    public UserResponseDTO updateUserByEmail(
             String userEmail,
             UserUpdateRequestDTO updateUserDTO
     ) {
@@ -398,10 +426,17 @@ public class UserService {
             }
 
             if (updateUserDTO.getUsername() != null) {
+                Optional<DBUser> existingUserWithUsername = userRepository.findByUsername(updateUserDTO.getUsername());
+                if (existingUserWithUsername.isPresent() && !existingUserWithUsername.get().getId().equals(user.getId())) {
+                    throw new DuplicateResourceException(
+                            "Ce nom d'utilisateur existe déjà"
+                    );
+                }
                 user.setUsername(updateUserDTO.getUsername());
             }
 
-            if (updateUserDTO.getPassword() != null) {
+            if (updateUserDTO.getPassword() != null && 
+                !updateUserDTO.getPassword().trim().isEmpty()) {
                 user.setPassword(
                         passwordEncoder.encode(updateUserDTO.getPassword())
                 );
